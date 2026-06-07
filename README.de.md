@@ -23,6 +23,9 @@ Dieses Projekt steht auf den Schultern von zwei großartigen Vorarbeiten:
 > [!IMPORTANT]
 > **Ohne auth2api gäbe es diese Flexibilität nicht.** auth2api stellt ein **vorhandenes Abo (z. B. Claude Max) als OpenAI-kompatible API** bereit – dadurch laufen die KI-Workflows hier **ohne zusätzliche Token-Kosten** über deinen bestehenden Account. Großen Dank an Marc Meese für dieses Tool! 🙏
 
+> [!WARNING]
+> **Nutzung auf eigene Gefahr.** Der programmatische Zugriff auf ein Consumer-Abo (z. B. Claude Max) über einen Proxy wie auth2api **kann den Nutzungsbedingungen des jeweiligen Anbieters widersprechen** und dein Konto gefährden. Ob und wie du einen solchen Proxy einsetzt, liegt in **deiner eigenen Verantwortung** – prüfe die Bedingungen des Anbieters, den du anbindest. Blitztext selbst ist anbieterneutral: Es spricht nur einen OpenAI-kompatiblen Endpunkt an und benötigt auth2api **nicht** (nutze stattdessen einen regulären API-Key, Ollama oder einen anderen kompatiblen Endpunkt).
+
 ## Was wurde geändert – und warum
 
 Das macOS-Binary lässt sich **nicht** unter Windows ausführen (es baut auf macOS-Frameworks wie AppKit, CoreML/WhisperKit, Keychain). Die Windows-Version ist daher eine **Neuimplementierung mit identischem Verhalten**:

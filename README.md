@@ -23,6 +23,9 @@ This project stands on the shoulders of two great pieces of prior work:
 > [!IMPORTANT]
 > **Without auth2api this flexibility wouldn't exist.** auth2api exposes an **existing subscription (e.g. Claude Max) as an OpenAI-compatible API** — so the AI workflows here run **without extra per-token costs**, through your existing account. Many thanks to Marc Meese for this tool! 🙏
 
+> [!WARNING]
+> **Use at your own risk.** Accessing a consumer subscription (e.g. Claude Max) programmatically through a proxy like auth2api **may violate that provider's terms of service** and could put your account at risk. Whether and how you use such a proxy is **your own responsibility** — check the terms of the provider you connect to. Blitztext itself is provider-neutral: it only talks to an OpenAI-compatible endpoint and does **not** require auth2api (use a regular API key, Ollama, or any compatible endpoint instead).
+
 ## What was changed — and why
 
 The macOS binary **cannot** run on Windows (it builds on macOS frameworks like AppKit, CoreML/WhisperKit, Keychain). The Windows version is therefore a **reimplementation with identical behavior**:
