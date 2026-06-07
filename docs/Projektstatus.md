@@ -46,7 +46,7 @@ Gleichzeitig wollte ich die **laufenden API-Kosten vermeiden**: Statt pro Token 
 | **Anbieter** | **`auth2api`** (Claude Max), Port **8317** | Nutzt vorhandenes Abo statt API-Kosten |
 | **Hotkeys** | Frei konfigurierbar (Hold/Toggle) | macOS nutzt `fn` – die gibt es unter Windows nicht |
 | **Autostart** | `tauri-plugin-autostart` (Registry `Run`) | Ersetzt macOS `SMAppService` |
-| **Versionierung** | Eigene SemVer-Spur ab `v0.1.0`, Fork, Feature-Branch | Saubere, vom Mac-Projekt unabhängige Historie |
+| **Versionierung** | Eigene SemVer-Spur ab `v0.1.0`, eigenständiges Repo, Branch `main` | Saubere, vom Mac-Projekt unabhängige Historie |
 
 > [!warning] Hinweis zu auth2api (Nutzungsbedingungen)
 > `auth2api` greift per Reverse-Proxy auf den Abo-Login zu. Das kann den AGB von Anthropic/OpenAI widersprechen und birgt ein Account-Risiko. Blitztext selbst ist **anbieterneutral** und spricht nur einen OpenAI-kompatiblen Endpunkt an.
