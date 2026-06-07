@@ -21,6 +21,9 @@ node_modules/
 # Release-Staging (Installer/Assets werden als GitHub-Release-Assets hochgeladen)
 release-assets/
 
+# Lokales Screenshot-Arbeitsverzeichnis (Rohmaterial; README nutzt docs/screenshots/)
+screenshoots/
+
 # Claude / lokale Tool-Konfiguration
 .claude/
 

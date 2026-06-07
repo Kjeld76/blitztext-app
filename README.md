@@ -54,6 +54,20 @@ Hotkeys are freely assignable in the settings; **hold** or **press/toggle** mode
 - **Pause** (header switch or tray): deregisters all global hotkeys without quitting the app. The **tray icon is colored = active, grayscale = paused**.
 - **Quit** only via tray → **Quit**.
 
+## Screenshots
+
+The main window — hold a workflow's hotkey (or click its tile), speak, and the text is pasted automatically:
+
+![Blitztext main window](docs/screenshots/win-start.png)
+
+**Settings → Access** — the OpenAI-compatible LLM gateway (e.g. auth2api): base URL, the correction/fast/strong models, and an optional token with a "Test connection" button:
+
+![Settings — LLM gateway](docs/screenshots/win-settings-access.png)
+
+**Settings** — download/select the local Whisper model, optionally configure an online STT endpoint, and toggle autostart:
+
+![Settings — Whisper model and system](docs/screenshots/win-settings-models.png)
+
 ## Installation
 
 Ready-made installers are in the [GitHub release](https://github.com/Kjeld76/blitztext-app/releases) — in **two variants**:

@@ -54,6 +54,20 @@ Hotkeys sind in den Einstellungen frei belegbar; **Halten**- oder **Drücken/Tog
 - **Pausieren** (Header-Schalter oder Tray): meldet alle globalen Hotkeys ab, ohne die App zu beenden. Das **Tray-Icon ist farbig = aktiv, grau = pausiert**.
 - **Beenden** nur über Tray → **Beenden**.
 
+## Screenshots
+
+Das Hauptfenster — Hotkey einer Kachel halten (oder die Kachel anklicken), sprechen, der Text wird automatisch eingefügt:
+
+![Blitztext Hauptfenster](docs/screenshots/win-start.png)
+
+**Einstellungen → Zugang** — der OpenAI-kompatible LLM-Gateway (z. B. auth2api): Basis-URL, die Korrektur-/Schnell-/Stark-Modelle und ein optionales Token mit „Verbindung testen":
+
+![Einstellungen — LLM-Gateway](docs/screenshots/win-settings-access.png)
+
+**Einstellungen** — lokales Whisper-Modell herunterladen/auswählen, optional einen Online-STT-Endpunkt einrichten und Autostart umschalten:
+
+![Einstellungen — Whisper-Modell und System](docs/screenshots/win-settings-models.png)
+
 ## Installation
 
 Fertige Installer gibt es im [GitHub-Release](https://github.com/Kjeld76/blitztext-app/releases) – in **zwei Varianten**:
