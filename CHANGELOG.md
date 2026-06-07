@@ -1,72 +1,74 @@
-# Changelog — Blitztext für Windows
+**English** · [Deutsch](CHANGELOG.de.md)
 
-Alle nennenswerten Änderungen an der Windows-Portierung von Blitztext werden hier dokumentiert.
+# Changelog — Blitztext for Windows
 
-Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
-und das Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
-Die Windows-App hat eine **eigene Versionsspur** (unabhängig von der macOS-App), beginnend bei `0.1.0`.
+All notable changes to the Windows port of Blitztext are documented here.
 
-## [Unveröffentlicht]
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and the project adheres to [Semantic Versioning](https://semver.org/).
+The Windows app has its **own version track** (independent of the macOS app), starting at `0.1.0`.
+
+## [Unreleased]
 
 ## [0.1.1] - 2026-06-07
 
-Erstes öffentliches Release mit **GPU-Beschleunigung**. Enthält alle Verbesserungen seit `0.1.0`.
+First public release with **GPU acceleration**. Includes all improvements since `0.1.0`.
 
-### Hinzugefügt
-- **GPU-Beschleunigung (CUDA)** aktiv: `large-v3` läuft auf der NVIDIA-GPU
-  (getestet auf RTX PRO 4000, Blackwell `sm_120`) — deutlich schneller als auf CPU.
-  Der GPU-Build aktiviert zugleich **Beam-Search** für höhere Genauigkeit.
-- **Pausieren/Aktivieren** ohne Beenden: globaler Schalter im Header und im Tray-Menü;
-  pausiert meldet alle globalen Hotkeys ab (App bleibt im Tray).
-- **Tray-Icon zeigt den Zustand**: farbig = aktiv, Graustufen = pausiert.
-- **Fenster schließbar**: Schließen-Button (✕) blendet ins Tray; Tray-Linksklick schaltet
-  das Fenster um (sichtbar ⇄ versteckt).
-- **Blitztext (B)** macht nach der lokalen Transkription eine **leichte Claude-Korrektur**
-  (Haiku, nur Zeichensetzung/Tippfehler); fällt bei nicht erreichbarem Gateway auf das
-  rohe Transkript zurück. Neues Setting `correctionModel`.
-- **GPU-Feature-Flag** (`--features cuda`): aktiviert zugleich Beam-Search (genauer).
-- Modell-Dropdown zeigt den **Installationsstatus** (nicht installierte deaktiviert).
-- **Eigenes App-/Tray-Icon** (Blitz + Sprechblasen) statt Tauri-Standard; auch im
-  Fenster-Header und als Favicon. Tray farbig = aktiv, Graustufen = pausiert.
+### Added
+- **GPU acceleration (CUDA)** active: `large-v3` runs on the NVIDIA GPU
+  (tested on an RTX PRO 4000, Blackwell `sm_120`) — much faster than on CPU.
+  The GPU build also enables **beam search** for higher accuracy.
+- **Pause/activate** without quitting: a global switch in the header and the tray menu;
+  paused deregisters all global hotkeys (the app stays in the tray).
+- **Tray icon shows the state**: colored = active, grayscale = paused.
+- **Closable window**: the close button (✕) hides to the tray; a left-click on the tray
+  toggles the window (visible ⇄ hidden).
+- **Blitztext (B)** performs a **light Claude correction** after local transcription
+  (Haiku, punctuation/typos only); falls back to the raw transcript if the gateway is
+  unreachable. New setting `correctionModel`.
+- **GPU feature flag** (`--features cuda`): also enables beam search (more accurate).
+- The model dropdown shows the **installation status** (uninstalled ones disabled).
+- **Custom app/tray icon** (lightning bolt + speech bubbles) instead of the Tauri default;
+  also in the window header and as the favicon. Tray colored = active, grayscale = paused.
 
-### Geändert
-- **whisper-rs auf 0.16** aktualisiert (von 0.12): unterstützt CUDA 13.x und die
-  Blackwell-Architektur (`sm_120`); CUDA-Zielarchitektur über
-  `CMAKE_CUDA_ARCHITECTURES` konfigurierbar.
-- **Audio-Resampling** auf 16 kHz mit Anti-Aliasing-Tiefpass → bessere Erkennung.
-- **Hotkey-Modi**: `R` (Beruhigen) nutzt jetzt **Sonnet** statt Opus.
-- Fenster nicht mehr „always on top".
+### Changed
+- **Updated whisper-rs to 0.16** (from 0.12): supports CUDA 13.x and the
+  Blackwell architecture (`sm_120`); the CUDA target architecture is configurable via
+  `CMAKE_CUDA_ARCHITECTURES`.
+- **Audio resampling** to 16 kHz with an anti-aliasing low-pass filter → better recognition.
+- **Hotkey modes**: `R` (calm down) now uses **Sonnet** instead of Opus.
+- The window is no longer "always on top".
 
-### Behoben
-- Hotkey-**Erfassung**: globale Shortcuts werden während des Erfassens pausiert, sodass
-  Kombinationen wie `Ctrl+Alt+B` (statt nur Einzeltasten) zuweisbar sind.
-- UI-Serialisierung (camelCase): behebt „undefined MB", leeres Modell-Dropdown und
-  falsche Token-Statusanzeige.
+### Fixed
+- Hotkey **capture**: global shortcuts are paused during capture, so combinations like
+  `Ctrl+Alt+B` (rather than only single keys) can be assigned.
+- UI serialization (camelCase): fixes "undefined MB", an empty model dropdown, and an
+  incorrect token status display.
 
-### Bekannt
-- **Auto-Paste** nutzt simuliertes `Strg+V` und klappt in normalen Programmen
-  (z. B. Editor, Obsidian). Manche **Terminals** belegen `Strg+V` nicht zum Einfügen
-  (dort Rechtsklick bzw. `Strg+Umschalt+V`) — ein Terminal-Fallback ist geplant.
+### Known
+- **Auto-paste** uses a simulated `Ctrl+V` and works in normal programs
+  (e.g. a text editor, Obsidian). Some **terminals** don't map `Ctrl+V` to paste
+  (use right-click or `Ctrl+Shift+V` there) — a terminal fallback is planned.
 
 ## [0.1.0] - 2026-06-06
 
-Erste lauffähige Windows-Version (Tauri, Rust + SvelteKit). Startet als Tray-App.
+First working Windows version (Tauri, Rust + SvelteKit). Starts as a tray app.
 
-### Hinzugefügt
-- **5 Workflows** portiert aus der macOS-App: Blitztext, Blitztext Lokal, Blitztext+,
-  Blitztext $%&!, Blitztext :) — LLM-Prompts wörtlich übernommen.
-- **Lokale Transkription** via whisper.cpp (`whisper-rs`) mit Modell `large-v3`
-  (höchste Genauigkeit); In-App-Modell-Download mit Fortschritt. Optionaler Online-STT.
-- **LLM-Umschreibung** über konfigurierbaren OpenAI-kompatiblen Endpunkt
-  (base_url + Modell + Token) — für auth2api/Ollama/OpenAI. „Verbindung testen".
-- **Globale Hotkeys**, frei konfigurierbar (Hold/Toggle, Esc-Abbruch), Defaults
+### Added
+- **5 workflows** ported from the macOS app: Blitztext, Blitztext Local, Blitztext+,
+  Blitztext $%&!, Blitztext :) — LLM prompts adopted verbatim.
+- **Local transcription** via whisper.cpp (`whisper-rs`) with the `large-v3` model
+  (highest accuracy); in-app model download with progress. Optional online STT.
+- **LLM rewriting** via a configurable OpenAI-compatible endpoint
+  (base_url + model + token) — for auth2api/Ollama/OpenAI. "Test connection".
+- **Global hotkeys**, freely configurable (hold/toggle, Esc to cancel), defaults
   `Ctrl+Alt+B/L/P/R/E`.
-- **Auto-Paste** via Zwischenablage + simuliertes Strg+V (keine Sonderrechte nötig).
-- **Tray-Icon** mit Statusanzeige; **Autostart** beim Windows-Start (umschaltbar).
-- Zugangsdaten im **Windows Credential Manager**; Einstellungen als JSON in `%APPDATA%\Blitztext`.
-- Einstellungs-UI (Hotkey-Editor, Gateway-Konfig, Modellverwaltung, Autostart).
+- **Auto-paste** via the clipboard + a simulated Ctrl+V (no special permissions needed).
+- **Tray icon** with status indicator; **autostart** at Windows start (toggleable).
+- Credentials in the **Windows Credential Manager**; settings as JSON in `%APPDATA%\Blitztext`.
+- Settings UI (hotkey editor, gateway config, model management, autostart).
 
-### Bekannte Einschränkungen
-- GPU-Beschleunigung (CUDA) noch nicht standardmäßig aktiviert — `large-v3` läuft zunächst auf CPU.
-- End-to-End-Funktionstest (Aufnahme→Transkript→Umschreiben) erfordert heruntergeladenes
-  Whisper-Modell und laufenden auth2api-Proxy.
+### Known limitations
+- GPU acceleration (CUDA) not enabled by default yet — `large-v3` runs on the CPU at first.
+- An end-to-end functional test (record → transcript → rewrite) requires a downloaded
+  Whisper model and a running auth2api proxy.

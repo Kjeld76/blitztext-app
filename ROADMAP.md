@@ -1,31 +1,33 @@
+**English** · [Deutsch](ROADMAP.de.md)
+
 # Roadmap
 
-Eine Preview-Roadmap, kein Versprechen.
+A preview roadmap, not a promise.
 
-> Betrifft die Windows-App in diesem Repository; das macOS-Original liegt im [Original-Repository](https://github.com/cmagnussen/blitztext-app).
+> Concerns the Windows app in this repository; the macOS original lives in the [original repository](https://github.com/cmagnussen/blitztext-app).
 
-## Aktueller Stand (erreicht)
+## Current state (done)
 
-- Native **Windows-11-Tray-App** (Tauri, Rust + SvelteKit)
-- **Lokale Transkription** mit Whisper `large-v3` (whisper.cpp)
-- KI-Workflows (verbessern / beruhigen / Emojis) über einen **konfigurierbaren OpenAI-kompatiblen Gateway** (z. B. auth2api/Claude)
-- **Blitztext (B)** mit leichter Claude-Korrektur; **Blitztext Lokal (L)** rein offline
-- **frei konfigurierbare** globale Hotkeys (Halten/Toggle)
-- **Autostart**, **Pausieren/Aktivieren**, Tray-Statusanzeige
-- **Eigenes App-/Tray-Icon** (Branding) statt Tauri-Standard
-- **GPU-Beschleunigung (CUDA)** für `large-v3` + Beam-Search (`--features cuda`); native Kernel sm_75–120 (Turing–Blackwell) + PTX-Fallback
-- MSI/NSIS-Installer (CPU- und CUDA-Variante)
+- Native **Windows 11 tray app** (Tauri, Rust + SvelteKit)
+- **Local transcription** with Whisper `large-v3` (whisper.cpp)
+- AI workflows (improve / calm down / emoji) via a **configurable OpenAI-compatible gateway** (e.g. auth2api/Claude)
+- **Blitztext (B)** with a light Claude correction; **Blitztext Local (L)** fully offline
+- **freely configurable** global hotkeys (hold/toggle)
+- **autostart**, **pause/activate**, tray status indicator
+- **custom app/tray icon** (branding) instead of the Tauri default
+- **GPU acceleration (CUDA)** for `large-v3` + beam search (`--features cuda`); native kernels sm_75–120 (Turing–Blackwell) + PTX fallback
+- MSI/NSIS installers (CPU and CUDA variants)
 
-## Nächste sinnvolle Schritte
+## Next sensible steps
 
-- **Terminal-Paste-Fallback** (`Strg+Umschalt+V` bei erkannten Terminal-Fenstern)
-- Onboarding-Feinschliff, Waveform-Anzeige
-- Optional: weitere Provider/Modelle (z. B. Gemini), Online-STT-Komfort
-- Kleine Test-Schicht um Prompt-Aufbau und Qualitätsfilter
+- **Terminal paste fallback** (`Ctrl+Shift+V` for detected terminal windows)
+- Onboarding polish, waveform display
+- Optional: more providers/models (e.g. Gemini), online-STT convenience
+- A small test layer around prompt assembly and quality filters
 
-## Vorerst nicht im Fokus
+## Not in focus for now
 
-- Produktions-Support
-- Accounts, Sync, Teams oder gehostete Infrastruktur
-- Aussagen, die App sei vollständig „offline/datenschutz-komplett", wenn ein Cloud-Gateway genutzt wird
-- Store-Distribution
+- Production support
+- Accounts, sync, teams, or hosted infrastructure
+- Claims that the app is fully "offline/privacy-complete" when a cloud gateway is used
+- Store distribution

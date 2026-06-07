@@ -1,48 +1,50 @@
-# Mitwirken
+**English** · [Deutsch](CONTRIBUTING.de.md)
 
-Danke, dass du dir Blitztext (Windows) ansiehst.
+# Contributing
 
-Dieses Repository ist bewusst ein **Preview/Lernprojekt**. Beiträge sollen es leichter machen, das Projekt zu verstehen, zu bauen, zu forken oder sicher zu erweitern.
+Thanks for taking a look at Blitztext (Windows).
 
-> Hinweis: Dieses Repository enthält die **Windows-App**. Das ursprüngliche macOS-Projekt (von cmagnussen) liegt im [Original-Repository](https://github.com/cmagnussen/blitztext-app) – siehe Herkunft in der [README](README.md).
+This repository is deliberately a **preview/learning project**. Contributions should make it easier to understand, build, fork, or safely extend the project.
 
-## Gute erste Beiträge
+> Note: This repository contains the **Windows app**. The original macOS project (by cmagnussen) lives in the [original repository](https://github.com/cmagnussen/blitztext-app) — see the origin section in the [README](README.md).
 
-- Build-Anleitung verbessern
-- verwirrende UI-Texte korrigieren
-- bessere Fehlermeldungen
-- Tests rund um Prompt-Aufbau und Qualitätsfilter
-- Setup vereinfachen
-- eigenes App-Icon / Branding
+## Good first contributions
 
-## Vor einem Pull Request
+- Improve the build instructions
+- Fix confusing UI text
+- Better error messages
+- Tests around prompt assembly and quality filters
+- Simplify the setup
+- A custom app icon / branding
 
-Bitte beschreibe:
+## Before a pull request
 
-- was geändert wurde
-- warum
-- wie du es getestet hast
+Please describe:
 
-Halte Änderungen klein und fokussiert; keine unzusammenhängenden Aufräumarbeiten im selben PR.
+- what changed
+- why
+- how you tested it
 
-## Lokaler Build (Windows)
+Keep changes small and focused; no unrelated cleanups in the same PR.
+
+## Local build (Windows)
 
 ```powershell
 pnpm install
-pnpm tauri dev          # starten (Entwicklung)
-pnpm tauri build        # Installer (MSI/NSIS)
+pnpm tauri dev          # run (development)
+pnpm tauri build        # installers (MSI/NSIS)
 ```
 
-Voraussetzungen und libclang-Hinweis siehe [README.md](README.md).
-Immer über die **Tauri-CLI** bauen, nicht über nacktes `cargo build`.
+For requirements and the libclang note, see [README.md](README.md).
+Always build via the **Tauri CLI**, not via a bare `cargo build`.
 
-## Sicherheit & Datenschutz
+## Security & privacy
 
-- **Niemals** API-Keys, Token, private Audios oder vertrauliche Transkripte committen.
-- Keine Telemetrie, gehosteten Dienste oder externen Abhängigkeiten ohne vorherige Diskussion (Issue).
-- Datenschutzrelevante Änderungen im PR klar benennen.
-- Ehrlich bleiben: einen Cloud-Pfad (z. B. KI-Umschreibung über einen Gateway) nicht als „offline/lokal" beschreiben.
+- **Never** commit API keys, tokens, private audio, or confidential transcripts.
+- No telemetry, hosted services, or external dependencies without prior discussion (an issue).
+- Clearly call out privacy-relevant changes in the PR.
+- Stay honest: don't describe a cloud path (e.g. AI rewriting via a gateway) as "offline/local".
 
-## Projekt-Rahmen
+## Project scope
 
-Im Fokus steht die Windows-App in diesem Repository. Größere Richtungsänderungen bitte zuerst in einem Issue besprechen.
+The focus is the Windows app in this repository. Please discuss larger directional changes in an issue first.

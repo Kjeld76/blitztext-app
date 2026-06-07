@@ -1,37 +1,39 @@
-# Sicherheitsrichtlinie
+**English** · [Deutsch](SECURITY.de.md)
 
-Blitztext (Windows) ist experimentelle Software – „as is", ohne Gewähr, Support-Garantie oder Produktionsreife.
+# Security Policy
 
-> Diese Richtlinie betrifft die Windows-App in diesem Repository. Das macOS-Original liegt im [Original-Repository](https://github.com/cmagnussen/blitztext-app).
+Blitztext (Windows) is experimental software — provided "as is", without warranty, support guarantee, or production readiness.
 
-## Unterstützte Versionen
+> This policy concerns the Windows app in this repository. The macOS original lives in the [original repository](https://github.com/cmagnussen/blitztext-app).
 
-Nur der aktuelle Entwicklungs-Branch wird für Sicherheitskorrekturen berücksichtigt.
+## Supported versions
 
-## Schwachstellen melden
+Only the current development branch is considered for security fixes.
 
-Bitte **keine** öffentlichen Issues mit sensiblen Sicherheitsdetails eröffnen.
+## Reporting vulnerabilities
 
-Nutze die **private Vulnerability-Reporting**-Funktion von GitHub für dieses Repository. Ist sie nicht verfügbar, öffne ein minimales Issue mit dem Titel `Security contact request` ohne technische Details.
+Please do **not** open public issues with sensitive security details.
 
-Keine API-Keys/Token, privaten Aufnahmen oder vertraulichen Transkripte in einem Report mitschicken.
+Use GitHub's **private vulnerability reporting** feature for this repository. If it is unavailable, open a minimal issue titled `Security contact request` without technical details.
 
-Bitte angeben:
+Do not include any API keys/tokens, private recordings, or confidential transcripts in a report.
 
-- was du gefunden hast
-- wie es reproduzierbar ist
-- welche Daten/Systemzugriffe betroffen sein könnten
-- ein Lösungsvorschlag, falls vorhanden
+Please include:
 
-## Sicherheitshinweise (Windows)
+- what you found
+- how it is reproducible
+- which data/system access could be affected
+- a proposed fix, if you have one
 
-- **Transkription läuft standardmäßig lokal** auf dem Gerät (whisper.cpp) – kein Cloud-Versand.
-- Die **KI-Umschreibung** sendet den (transkribierten) **Text** an den von dir konfigurierten OpenAI-kompatiblen Endpunkt (z. B. einen lokal laufenden auth2api-Proxy).
-- Ein **optionaler Online-STT-Endpunkt** sendet Audio an den konfigurierten Dienst – nur, wenn du ihn einrichtest (Standard: leer = lokal).
-- Zugangs-Token liegt im **Windows Credential Manager**, nicht im Klartext-JSON.
-- Temporäre Audiodateien können während der Verarbeitung kurz existieren.
-- **Auto-Paste** erfolgt per simuliertem Strg+V (SendInput) – ohne besondere Systemberechtigung.
-- **Globale Hotkeys** sind systemweit aktiv (im UI/Tray pausierbar).
-- Hinweis: Ein Reverse-Proxy wie auth2api, der ein Abo als API bereitstellt, kann den AGB des jeweiligen Anbieters widersprechen. Nutzung auf eigene Verantwortung.
+## Security notes (Windows)
 
-Nutze diese Preview nicht für vertrauliche oder regulierte Daten ohne eigene Prüfung.
+- **Transcription runs locally by default** on the device (whisper.cpp) — nothing is sent to the cloud.
+- **AI rewriting** sends the (transcribed) **text** to the OpenAI-compatible endpoint you configured (e.g. a locally running auth2api proxy).
+- An **optional online STT endpoint** sends audio to the configured service — only if you set it up (default: empty = local).
+- The access token is stored in the **Windows Credential Manager**, not in plaintext JSON.
+- Temporary audio files may briefly exist during processing.
+- **Auto-paste** is done via a simulated Ctrl+V (SendInput) — without special system permissions.
+- **Global hotkeys** are active system-wide (pausable in the UI/tray).
+- Note: a reverse proxy like auth2api that exposes a subscription as an API may conflict with the respective provider's terms of service. Use at your own risk.
+
+Do not use this preview for confidential or regulated data without your own review.

@@ -1,159 +1,161 @@
-# Blitztext für Windows
+**English** · [Deutsch](README.de.md)
 
-Blitztext ist eine **Windows-11-Tray-App**, die Sprache in Text verwandelt: Hotkey drücken, sprechen, Text zurückbekommen, optional per KI umschreiben und automatisch in die zuvor benutzte App einfügen.
+# Blitztext for Windows
 
-Es ist bewusst klein und „hackbar" gehalten – ein nachvollziehbarer, echter Workflow zum Anschauen und Anpassen, kein poliertes Fertigprodukt.
+Blitztext is a **Windows 11 tray app** that turns speech into text: press a hotkey, speak, get text back, optionally rewrite it with AI, and have it pasted automatically into the app you were just using.
 
-## Herkunft / Basiert auf
+It is deliberately small and "hackable" — a real, legible workflow you can read and adapt, not a polished finished product.
+
+## Origin / based on
 
 > [!IMPORTANT]
-> **Dieses Projekt ist eine Portierung** der ursprünglichen **macOS-App „Blitztext"** von **cmagnussen**: <https://github.com/cmagnussen/blitztext-app>.
+> **This project is a port** of the original **macOS app "Blitztext"** by **cmagnussen**: <https://github.com/cmagnussen/blitztext-app>.
 >
-> Die gesamte Idee, die Workflows und die KI-Prompts stammen aus diesem Original (veröffentlicht unter **MIT**). Dieses Repository enthält die eigenständige **Windows-Portierung**; der macOS-Originalcode liegt im [Original-Repository](https://github.com/cmagnussen/blitztext-app). Dank an das Original-Projekt.
+> The entire idea, the workflows, and the AI prompts come from that original (released under **MIT**). This repository contains the standalone **Windows port**; the macOS source lives in the [original repository](https://github.com/cmagnussen/blitztext-app). Thanks to the original project.
 
-## Danksagung & Credits
+## Acknowledgements & credits
 
-Dieses Projekt steht auf den Schultern von zwei großartigen Vorarbeiten:
+This project stands on the shoulders of two great pieces of prior work:
 
-- 🎙️ **Blitztext (Original, macOS)** von **cmagnussen** – Idee, Workflows und Prompts: <https://github.com/cmagnussen/blitztext-app>
-- 🔌 **auth2api** von **Marc Meese** – der eigentliche Schlüssel zur Flexibilität: <https://community.marcmeese.de/freebie/auth2api> (Docker-Image: `ranktotop/auth2api`)
+- 🎙️ **Blitztext (original, macOS)** by **cmagnussen** — idea, workflows, and prompts: <https://github.com/cmagnussen/blitztext-app>
+- 🔌 **auth2api** by **Marc Meese** — the actual key to the flexibility: <https://community.marcmeese.de/freebie/auth2api> (Docker image: `ranktotop/auth2api`)
 
 > [!IMPORTANT]
-> **Ohne auth2api gäbe es diese Flexibilität nicht.** auth2api stellt ein **vorhandenes Abo (z. B. Claude Max) als OpenAI-kompatible API** bereit – dadurch laufen die KI-Workflows hier **ohne zusätzliche Token-Kosten** über deinen bestehenden Account. Großen Dank an Marc Meese für dieses Tool! 🙏
+> **Without auth2api this flexibility wouldn't exist.** auth2api exposes an **existing subscription (e.g. Claude Max) as an OpenAI-compatible API** — so the AI workflows here run **without extra per-token costs**, through your existing account. Many thanks to Marc Meese for this tool! 🙏
 
-## Was wurde geändert – und warum
+## What was changed — and why
 
-Das macOS-Binary lässt sich **nicht** unter Windows ausführen (es baut auf macOS-Frameworks wie AppKit, CoreML/WhisperKit, Keychain). Die Windows-Version ist daher eine **Neuimplementierung mit identischem Verhalten**:
+The macOS binary **cannot** run on Windows (it builds on macOS frameworks like AppKit, CoreML/WhisperKit, Keychain). The Windows version is therefore a **reimplementation with identical behavior**:
 
-| Bereich | Original (macOS) | Windows-Portierung | Warum |
+| Area | Original (macOS) | Windows port | Why |
 |---|---|---|---|
-| Technik | Swift / SwiftUI | **Tauri (Rust + SvelteKit)** | Läuft nativ unter Windows, schlankes Binary |
-| Transkription | WhisperKit / CoreML | **whisper.cpp (`large-v3`)** | CoreML gibt es nur auf dem Mac |
-| KI-Umschreiben | fest OpenAI | **konfigurierbarer OpenAI-kompatibler Endpunkt** | Nutzung vorhandener Abos via Proxy (z. B. auth2api/Claude), Ollama oder OpenAI – ohne Code-Änderung |
-| Hotkeys | `fn` + Modifier (fest) | **frei konfigurierbar** (Strg/Alt/…) | Die `fn`-Taste gibt es unter Windows nicht |
-| Auto-Paste | CGEvent + Accessibility | **Strg+V via SendInput** | Unter Windows ohne Sonderrechte möglich |
-| Geheimnisse | macOS Keychain | **Windows Credential Manager** | Plattform-Äquivalent |
-| Autostart | SMAppService | **Registry-`Run` (tauri-plugin-autostart)** | Plattform-Äquivalent |
+| Tech | Swift / SwiftUI | **Tauri (Rust + SvelteKit)** | Runs natively on Windows, lean binary |
+| Transcription | WhisperKit / CoreML | **whisper.cpp (`large-v3`)** | CoreML only exists on the Mac |
+| AI rewriting | hardwired OpenAI | **configurable OpenAI-compatible endpoint** | Use existing subscriptions via a proxy (e.g. auth2api/Claude), Ollama, or OpenAI — without code changes |
+| Hotkeys | `fn` + modifier (fixed) | **freely configurable** (Ctrl/Alt/…) | There is no `fn` key on Windows |
+| Auto-paste | CGEvent + Accessibility | **Ctrl+V via SendInput** | Possible on Windows without special permissions |
+| Secrets | macOS Keychain | **Windows Credential Manager** | Platform equivalent |
+| Autostart | SMAppService | **Registry `Run` (tauri-plugin-autostart)** | Platform equivalent |
 
-## Funktionen
+## Features
 
-- **Blitztext** (`Strg+Alt+B`): aufnehmen → lokal transkribieren → optional leichte KI-Korrektur (Zeichensetzung/Tippfehler) → einfügen.
-- **Blitztext Lokal** (`Strg+Alt+L`): wie oben, aber **rein lokal/offline** (keine Cloud).
-- **Blitztext+** (`Strg+Alt+P`): aufnehmen → transkribieren → Text sauberer formulieren (Ton wählbar).
-- **Blitztext $%&!** (`Strg+Alt+R`): frustriert eingesprochenen Text in eine ruhige Nachricht umwandeln.
-- **Blitztext :)** (`Strg+Alt+E`): passende Emojis in den diktierten Text einfügen.
+- **Blitztext** (`Ctrl+Alt+B`): record → transcribe locally → optional light AI correction (punctuation/typos) → paste.
+- **Blitztext Local** (`Ctrl+Alt+L`): same as above, but **fully local/offline** (no cloud).
+- **Blitztext+** (`Ctrl+Alt+P`): record → transcribe → rephrase the text more cleanly (selectable tone).
+- **Blitztext $%&!** (`Ctrl+Alt+R`): turn a frustrated, dictated rant into a calm message.
+- **Blitztext :)** (`Ctrl+Alt+E`): insert fitting emoji into the dictated text.
 
-Hotkeys sind in den Einstellungen frei belegbar; **Halten**- oder **Drücken/Toggle**-Modus.
+Hotkeys are freely assignable in the settings; **hold** or **press/toggle** mode.
 
-### Bedienung
+### Usage
 
-- **Tray-Icon** (unten rechts, ggf. im Überlauf „^"): Linksklick öffnet/schließt das Fenster; Rechtsklick öffnet das Menü (Öffnen, Einstellungen, Pausieren/Aktivieren, Beenden).
-- **✕** im Fenster blendet ins Tray (die App läuft im Hintergrund weiter).
-- **Pausieren** (Header-Schalter oder Tray): meldet alle globalen Hotkeys ab, ohne die App zu beenden. Das **Tray-Icon ist farbig = aktiv, grau = pausiert**.
-- **Beenden** nur über Tray → **Beenden**.
+- **Tray icon** (bottom right, possibly in the "^" overflow): left-click opens/closes the window; right-click opens the menu (Open, Settings, Pause/Activate, Quit).
+- **✕** in the window hides it to the tray (the app keeps running in the background).
+- **Pause** (header switch or tray): deregisters all global hotkeys without quitting the app. The **tray icon is colored = active, grayscale = paused**.
+- **Quit** only via tray → **Quit**.
 
 ## Installation
 
-Fertige Installer gibt es im [GitHub-Release](https://github.com/Kjeld76/blitztext-app/releases) – in **zwei Varianten**:
+Ready-made installers are in the [GitHub release](https://github.com/Kjeld76/blitztext-app/releases) — in **two variants**:
 
-- **CPU** (`Blitztext_<version>_x64-cpu-setup.exe`): universell, klein, läuft auf jedem x64-Windows. Empfohlen **ohne** NVIDIA-GPU.
-- **CUDA/GPU** (`Blitztext_<version>_x64-cuda-setup.exe`): mit NVIDIA-GPU-Beschleunigung (`large-v3` läuft deutlich schneller). Enthält die nötige CUDA-Runtime – ein **separates CUDA-Toolkit ist nicht erforderlich**. Empfohlen **mit** NVIDIA-GPU (Turing oder neuer).
+- **CPU** (`Blitztext_<version>_x64-cpu-setup.exe`): universal, small, runs on any x64 Windows. Recommended **without** an NVIDIA GPU.
+- **CUDA/GPU** (`Blitztext_<version>_x64-cuda-setup.exe`): with NVIDIA GPU acceleration (`large-v3` runs much faster). Bundles the required CUDA runtime — a **separate CUDA toolkit is not needed**. Recommended **with** an NVIDIA GPU (Turing or newer).
 
-Beide jeweils auch als `.msi`. Nach der Installation beim ersten Start das Whisper-Modell in den Einstellungen herunterladen. Die Installer sind nicht signiert – Windows SmartScreen kann beim ersten Start warnen („Weitere Informationen" → „Trotzdem ausführen").
+Each is also available as `.msi`. After installing, download the Whisper model in the settings on first launch. The installers are unsigned — Windows SmartScreen may warn on first launch ("More info" → "Run anyway").
 
-## Systemvoraussetzungen (Nutzung)
+## System requirements (usage)
 
-| | Minimum | Empfohlen |
+| | Minimum | Recommended |
 |---|---|---|
-| **Betriebssystem** | Windows 10 64-bit (21H2) | Windows 11 |
-| **Architektur** | x64 | x64 (kein ARM64-Build) |
-| **Arbeitsspeicher** | 8 GB | 16 GB (`large-v3` belegt ~3 GB) |
-| **Festplatte** | ~150 MB App + **~3,1 GB** für das Modell `large-v3` (Download in der App) | zzgl. temporäre Audiodaten |
-| **Mikrofon** | erforderlich | — |
+| **Operating system** | Windows 10 64-bit (21H2) | Windows 11 |
+| **Architecture** | x64 | x64 (no ARM64 build) |
+| **Memory** | 8 GB | 16 GB (`large-v3` uses ~3 GB) |
+| **Disk** | ~150 MB app + **~3.1 GB** for the `large-v3` model (downloaded in the app) | plus temporary audio data |
+| **Microphone** | required | — |
 
-**GPU (optional, nur CUDA-Installer):** NVIDIA mit CUDA Compute Capability **≥ 7.5** (Turing oder neuer: GTX 16xx, RTX 20xx / 30xx / 40xx / 50xx, RTX PRO / Blackwell), **~4 GB freier VRAM** für `large-v3` (sonst `large-v3-turbo` oder CPU), aktueller NVIDIA-Treiber (für Blackwell/`sm_120` mit CUDA-13-Unterstützung). Die CUDA-Runtime-Bibliotheken sind im CUDA-Installer enthalten.
+**GPU (optional, CUDA installer only):** NVIDIA with CUDA compute capability **≥ 7.5** (Turing or newer: GTX 16xx, RTX 20xx / 30xx / 40xx / 50xx, RTX PRO / Blackwell), **~4 GB free VRAM** for `large-v3` (otherwise `large-v3-turbo` or CPU), a current NVIDIA driver (for Blackwell/`sm_120` with CUDA 13 support). The CUDA runtime libraries are bundled in the CUDA installer.
 
-**Ohne passende NVIDIA-GPU:** der **CPU-Installer** läuft überall (auch AMD/Intel/ohne GPU), nur langsamer.
+**Without a suitable NVIDIA GPU:** the **CPU installer** runs everywhere (including AMD/Intel/no GPU), just slower.
 
-## Wichtige Hinweise (Preview)
+## Important notes (preview)
 
-- Diese Version ist für **Windows 11**; die macOS-Variante findet sich im [Original-Repository](https://github.com/cmagnussen/blitztext-app).
-- **Eigene Zugänge mitbringen:** Die Spracherkennung läuft lokal (kostenlos). Für die KI-Umschreibung brauchst du einen **OpenAI-kompatiblen Endpunkt** (z. B. einen eigenen auth2api-Proxy, Ollama oder einen OpenAI-Key).
-- **Kein gehostetes Backend.** Im Online-Fall gehen Daten direkt von deinem Rechner an den von dir konfigurierten Endpunkt.
-- Lern- und Experimentierprojekt, **nicht produktionsreif**, ohne Gewähr und ohne Support-Garantie.
+- This version targets **Windows 11**; the macOS variant lives in the [original repository](https://github.com/cmagnussen/blitztext-app).
+- **Bring your own access:** speech recognition runs locally (free). For AI rewriting you need an **OpenAI-compatible endpoint** (e.g. your own auth2api proxy, Ollama, or an OpenAI key).
+- **No hosted backend.** In the online case, data goes directly from your machine to the endpoint you configured.
+- A learning and experimentation project, **not production-ready**, no warranty and no support guarantee.
 
-## Voraussetzungen (Entwicklung / Bauen aus dem Quellcode)
+## Requirements (development / building from source)
 
-> Nur nötig, wenn du selbst baust. Für die reine Nutzung siehe **Installation** oben.
+> Only needed if you build it yourself. For plain usage see **Installation** above.
 
 - **Windows 11**
 - **Rust** (stable, MSVC) + **VC++ Build Tools 2022**
-- **Node ≥ 20** und **pnpm**
-- **CMake** (für whisper.cpp) und **libclang** (für `whisper-rs`/bindgen; z. B. via `winget install LLVM.LLVM`, dann `LIBCLANG_PATH` setzen)
-- Für die KI-Workflows: ein **OpenAI-kompatibler Endpunkt** (Basis-URL + Modell + ggf. Token)
-- Für lokale Transkription: das Whisper-Modell `large-v3` (Download direkt in der App)
+- **Node ≥ 20** and **pnpm**
+- **CMake** (for whisper.cpp) and **libclang** (for `whisper-rs`/bindgen; e.g. via `winget install LLVM.LLVM`, then set `LIBCLANG_PATH`)
+- For the AI workflows: an **OpenAI-compatible endpoint** (base URL + model + optional token)
+- For local transcription: the Whisper model `large-v3` (downloaded directly in the app)
 
-## Bauen & Starten
+## Build & run
 
 ```powershell
 git clone https://github.com/Kjeld76/blitztext-app.git
 cd blitztext-app
 pnpm install
-pnpm tauri dev          # App im Tray starten (Entwicklung)
-pnpm tauri build        # MSI/NSIS-Installer bauen
+pnpm tauri dev          # start the app in the tray (development)
+pnpm tauri build        # build the MSI/NSIS installers
 ```
 
-GPU-Beschleunigung (NVIDIA/CUDA) optional: `pnpm tauri build --features cuda` (aktiviert zugleich Beam-Search für höhere Genauigkeit). Zum **Bauen** wird das CUDA-Toolkit (13.x) benötigt; die Ziel-Architekturen werden über `CMAKE_CUDA_ARCHITECTURES` in der lokalen `src-tauri/.cargo/config.toml` gesetzt (z. B. `75-real;86-real;89-real;120-real;75-virtual` für Turing–Blackwell). Die **fertigen CUDA-Installer** bringen die CUDA-Runtime selbst mit – Endnutzer brauchen kein Toolkit.
+GPU acceleration (NVIDIA/CUDA) is optional: `pnpm tauri build --features cuda` (also enables beam search for higher accuracy). **Building** requires the CUDA toolkit (13.x); the target architectures are set via `CMAKE_CUDA_ARCHITECTURES` in the local `src-tauri/.cargo/config.toml` (e.g. `75-real;86-real;89-real;120-real;75-virtual` for Turing–Blackwell). The **finished CUDA installers** ship the CUDA runtime themselves — end users don't need a toolkit.
 
-> Immer über die **Tauri-CLI** bauen (`pnpm tauri …`), **nicht** über nacktes `cargo build` – sonst erwartet die App den Dev-Server auf `localhost:1420`.
+> Always build via the **Tauri CLI** (`pnpm tauri …`), **not** via a bare `cargo build` — otherwise the app expects the dev server on `localhost:1420`.
 
-Beim ersten Start: in **Einstellungen → Zugang** den LLM-Gateway (Basis-URL/Modell/Token) eintragen und das Whisper-Modell herunterladen.
+On first launch: enter the LLM gateway (base URL/model/token) under **Settings → Access** and download the Whisper model.
 
-## Berechtigungen
+## Permissions
 
-- **Mikrofon**: zum Aufnehmen deiner Stimme. Falls nach dem Sprechen kein Text kommt: *Windows-Einstellungen → Datenschutz → Mikrofon → „Desktop-Apps Zugriff erlauben"*.
-- Eine separate Accessibility-Freigabe wie unter macOS ist **nicht nötig** – das Einfügen erfolgt per simuliertem Strg+V.
+- **Microphone**: to record your voice. If no text appears after speaking: *Windows Settings → Privacy → Microphone → "Let desktop apps access your microphone"*.
+- A separate Accessibility grant like on macOS is **not needed** — pasting is done via a simulated Ctrl+V.
 
-## Datenfluss
+## Data flow
 
 ```text
-Transkription (Standard): dein PC -> lokales whisper.cpp (large-v3)
-KI-Umschreiben:           dein PC -> dein OpenAI-kompatibler Endpunkt (z. B. auth2api -> Claude)
-Transkription (optional): dein PC -> externer OpenAI-kompatibler STT-Dienst (nur falls konfiguriert)
+Transcription (default):  your PC -> local whisper.cpp (large-v3)
+AI rewriting:             your PC -> your OpenAI-compatible endpoint (e.g. auth2api -> Claude)
+Transcription (optional): your PC -> external OpenAI-compatible STT service (only if configured)
 ```
 
-Kein gehostetes Blitztext-Backend. Der Zugangs-Token liegt im **Windows Credential Manager**, Einstellungen in `%APPDATA%\Blitztext\settings.json`, Modelle in `%APPDATA%\Blitztext\models\`.
+No hosted Blitztext backend. The access token is stored in the **Windows Credential Manager**, settings in `%APPDATA%\Blitztext\settings.json`, models in `%APPDATA%\Blitztext\models\`.
 
-## Projektstruktur
+## Project structure
 
 ```text
-src-tauri/         Rust-Backend (Audio, Whisper, LLM-Gateway, Hotkeys, Tray, Autostart)
-src/               SvelteKit-UI (Workflow-Kacheln, Einstellungen)
-static/            Statische Assets
-docs/Projektstatus.md   Ausführlicher Statusbericht
-CHANGELOG.md       Änderungshistorie
-THIRD-PARTY-NOTICES.md  Drittanbieter-Lizenzen (u. a. gebündelte NVIDIA-CUDA-Runtime)
+src-tauri/         Rust backend (audio, Whisper, LLM gateway, hotkeys, tray, autostart)
+src/               SvelteKit UI (workflow tiles, settings)
+static/            Static assets
+docs/Projektstatus.md   Detailed status report (in German)
+CHANGELOG.md       Change history
+THIRD-PARTY-NOTICES.md  Third-party licenses (incl. the bundled NVIDIA CUDA runtime)
 ```
 
-## Lokale Modelle
+## Local models
 
-Die lokale Transkription nutzt whisper.cpp. Die App bündelt kein Modell – in den Einstellungen `large-v3` (höchste Genauigkeit) auswählen und herunterladen. Mit GPU/CUDA läuft es deutlich schneller.
+Local transcription uses whisper.cpp. The app does not bundle a model — select and download `large-v3` (highest accuracy) in the settings. With GPU/CUDA it runs much faster.
 
-## Mitwirken
+## Contributing
 
-Beiträge sind willkommen, besonders wenn sie das Bauen, Verstehen oder Forken erleichtern. Siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome, especially ones that make building, understanding, or forking easier. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Lizenz
+## License
 
-Code unter der **MIT-Lizenz** – siehe [LICENSE](LICENSE). Diese Windows-Portierung übernimmt die Lizenz des Originals (cmagnussen/blitztext-app).
+Code under the **MIT License** — see [LICENSE](LICENSE). This Windows port adopts the license of the original (cmagnussen/blitztext-app).
 
-Projektnamen, Logos und App-Icons sind damit nicht automatisch als Marken/Brand-Assets freigegeben – siehe [TRADEMARKS.md](TRADEMARKS.md).
+Project names, logos, and app icons are therefore not automatically released as trademarks/brand assets — see [TRADEMARKS.md](TRADEMARKS.md).
 
-## Rechtliches / Impressum & Datenschutz
+## Legal / imprint & privacy
 
-Experimentelles, nicht-kommerzielles Open-Source-Projekt, „as is" unter MIT, ohne Gewähr oder Support. Es wird nichts verkauft und nichts in deinem Auftrag installiert oder betrieben.
+An experimental, non-commercial open-source project, provided "as is" under MIT, without warranty or support. Nothing is sold, and nothing is installed or operated on your behalf.
 
-Die Begleit-Website (blitztext.de) des Originals wird von der Blackboat Internet GmbH betrieben:
+The companion website (blitztext.de) of the original is operated by Blackboat Internet GmbH:
 
-- Impressum: <https://www.blackboat.com/impressum>
-- Datenschutz: <https://www.blackboat.com/datenschutz>
+- Imprint: <https://www.blackboat.com/impressum>
+- Privacy: <https://www.blackboat.com/datenschutz>

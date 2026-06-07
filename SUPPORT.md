@@ -1,25 +1,27 @@
+**English** · [Deutsch](SUPPORT.de.md)
+
 # Support
 
-Blitztext (Windows) ist eine experimentelle Preview. Es gibt **kein** SLA, keinen bezahlten Support und keine Garantie, dass Probleme behoben werden.
+Blitztext (Windows) is an experimental preview. There is **no** SLA, no paid support, and no guarantee that issues will be fixed.
 
-> Betrifft die Windows-App in diesem Repository; das macOS-Original liegt im [Original-Repository](https://github.com/cmagnussen/blitztext-app).
+> Concerns the Windows app in this repository; the macOS original lives in the [original repository](https://github.com/cmagnussen/blitztext-app).
 
-## Bevor du um Hilfe bittest
+## Before asking for help
 
-- Stelle sicher, dass die App baut/startet: `pnpm install && pnpm tauri dev` (bzw. `pnpm tauri build`).
-- Prüfe den **LLM-Gateway** in den Einstellungen (Basis-URL/Modell/Token) und teste die Verbindung.
-- Prüfe die **Mikrofon-Berechtigung**: Windows-Einstellungen → Datenschutz → Mikrofon → „Desktop-Apps Zugriff erlauben".
-- Stelle sicher, dass das **Whisper-Modell** (`large-v3`) in den Einstellungen heruntergeladen/aktiv ist.
+- Make sure the app builds/starts: `pnpm install && pnpm tauri dev` (or `pnpm tauri build`).
+- Check the **LLM gateway** in the settings (base URL/model/token) and test the connection.
+- Check the **microphone permission**: Windows Settings → Privacy → Microphone → "Let desktop apps access your microphone".
+- Make sure the **Whisper model** (`large-v3`) is downloaded/active in the settings.
 
-## Wo fragen
+## Where to ask
 
-GitHub Issues für reproduzierbare Fehler und fokussierte Feature-Ideen.
+GitHub Issues for reproducible bugs and focused feature ideas.
 
-Bitte **nicht** posten:
+Please do **not** post:
 
-- API-Keys / Token
-- private Audioaufnahmen
-- vertrauliche Transkripte
-- Screenshots mit sensiblen Inhalten
+- API keys / tokens
+- private audio recordings
+- confidential transcripts
+- screenshots with sensitive content
 
-Für sicherheitsrelevante Meldungen siehe [SECURITY.md](SECURITY.md) statt eines öffentlichen Issues.
+For security-relevant reports, see [SECURITY.md](SECURITY.md) instead of a public issue.
