@@ -1,0 +1,30 @@
+# Node / Frontend
+node_modules/
+/build/
+/dist/
+/.svelte-kit/
+/.vite/
+*.local
+.env
+.env.*
+
+# Tauri / Rust
+/src-tauri/target/
+/src-tauri/gen/schemas/
+
+# Lokale, maschinenspezifische Build-Konfiguration (nicht eingecheckt)
+/src-tauri/.cargo/config.toml
+
+# Lokale CUDA-Runtime-DLLs für den GPU-Installer (~489 MB, nicht eingecheckt)
+/src-tauri/cuda-redist/
+
+# Release-Staging (Installer/Assets werden als GitHub-Release-Assets hochgeladen)
+release-assets/
+
+# Claude / lokale Tool-Konfiguration
+.claude/
+
+# Editoren / OS
+.DS_Store
+Thumbs.db
+*.swp

@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret hygiene scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Secret hygiene scan
+        run: |
+          patterns_file=.github/secret-scan-patterns.txt
+          if [ ! -f "$patterns_file" ]; then
+            echo "Missing $patterns_file"
+            exit 1
+          fi
+          pattern="$(grep -vE '^[[:space:]]*(#|$)' "$patterns_file" | paste -sd'|' -)"
+          if [ -z "$pattern" ]; then
+            echo "No patterns loaded from $patterns_file"
+            exit 1
+          fi
+          if grep -RInE \
+              --exclude-dir=.git \
+              --exclude-dir=node_modules \
+              --exclude=secret-scan-patterns.txt \
+              "$pattern" .; then
+            echo "Potential secret found."
+            exit 1
+          fi
+
+  frontend:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm build
