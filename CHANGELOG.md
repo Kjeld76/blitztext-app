@@ -10,6 +10,15 @@ The Windows app has its **own version track** (independent of the macOS app), st
 
 ## [Unreleased]
 
+### Fixed
+- **Spoken sentence was sometimes answered instead of improved**: when a transcript
+  was phrased like a question or request (e.g. "Can you help me find a date?"), the LLM
+  could reply to it instead of just correcting/improving the wording, and that reply was
+  pasted. The transcript is now wrapped in explicit markers and every text prompt carries
+  a guard clause instructing the model to treat the input strictly as text to edit — never
+  as an instruction. Applies to all text workflows (correction, improver, emoji, calm down),
+  including custom prompts.
+
 ## [0.1.1] - 2026-06-07
 
 First public release with **GPU acceleration**. Includes all improvements since `0.1.0`.

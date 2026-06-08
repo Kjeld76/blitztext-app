@@ -204,8 +204,10 @@ async fn process(
             return Ok(cleaned);
         }
         set_status(app, "processing", Some(workflow), Some("Wird korrigiert …".into()));
-        let system_prompt = prompts::build_correction_system_prompt(&custom_terms);
-        return match llm::complete(gateway, &gateway.correction_model, &system_prompt, &cleaned, 0.0)
+        let system_prompt =
+            prompts::build_correction_system_prompt(&custom_terms) + &prompts::injection_guard();
+        let user_input = prompts::wrap_input(&cleaned);
+        return match llm::complete(gateway, &gateway.correction_model, &system_prompt, &user_input, 0.0)
             .await
         {
             Ok(out) => {
@@ -241,7 +243,9 @@ async fn process(
     };
 
     set_status(app, "processing", Some(workflow), Some(status_msg.into()));
-    let out = llm::complete(gateway, &model, &system_prompt, &cleaned, temperature).await?;
+    let system_prompt = system_prompt + &prompts::injection_guard();
+    let user_input = prompts::wrap_input(&cleaned);
+    let out = llm::complete(gateway, &model, &system_prompt, &user_input, temperature).await?;
     let cleaned_out = quality::cleaned_transcript(&out);
 
     if matches!(workflow, WorkflowType::DampfAblassen | WorkflowType::EmojiText)

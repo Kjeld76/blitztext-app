@@ -10,6 +10,15 @@ Die Windows-App hat eine **eigene Versionsspur** (unabhängig von der macOS-App)
 
 ## [Unveröffentlicht]
 
+### Behoben
+- **Eingesprochener Satz wurde mitunter beantwortet statt verbessert**: War ein Transkript
+  wie eine Frage oder Bitte formuliert (z. B. „Kannst du mir einen Termin finden?"), konnte
+  das LLM darauf antworten, statt nur den Wortlaut zu korrigieren/verbessern — und diese
+  Antwort wurde eingefügt. Das Transkript wird jetzt in eindeutige Marker eingefasst, und
+  jedes Text-Prompt erhält eine Schutzklausel, die das Modell anweist, die Eingabe strikt
+  als zu bearbeitenden Text zu behandeln — niemals als Anweisung. Gilt für alle
+  Text-Workflows (Korrektur, Verbesserer, Emoji, Dampf ablassen), auch für eigene Prompts.
+
 ## [0.1.1] - 2026-06-07
 
 Erstes öffentliches Release mit **GPU-Beschleunigung**. Enthält alle Verbesserungen seit `0.1.0`.
