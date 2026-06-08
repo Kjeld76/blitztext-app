@@ -11,6 +11,10 @@ The Windows app has its **own version track** (independent of the macOS app), st
 ## [Unreleased]
 
 ### Fixed
+- **Beginning of recordings was clipped**: the UI signalled "recording" before the
+  microphone was actually live, so the first word(s) were lost while WASAPI opened the
+  input device (~100–300 ms). Recording start now waits for the audio stream to actually
+  play before signalling readiness, and the duration is timed from that point.
 - **Spoken sentence was sometimes answered instead of improved**: when a transcript
   was phrased like a question or request (e.g. "Can you help me find a date?"), the LLM
   could reply to it instead of just correcting/improving the wording, and that reply was

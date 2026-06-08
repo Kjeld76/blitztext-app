@@ -7,9 +7,9 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::Sample;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread::JoinHandle;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 const TARGET_RATE: u32 = 16_000;
 
@@ -73,15 +73,36 @@ impl Recorder {
 
         let recording = self.recording.clone();
         let shared = self.shared.clone();
+        // Der Capture-Thread meldet hierueber, sobald der Stream wirklich laeuft.
+        let (ready_tx, ready_rx) = mpsc::channel::<Result<(), String>>();
 
         let handle = std::thread::spawn(move || {
-            if let Err(e) = capture_loop(&recording, &shared) {
+            if let Err(e) = capture_loop(&recording, &shared, ready_tx) {
                 *shared.error.lock().unwrap() = Some(e);
                 recording.store(false, Ordering::Release);
             }
         });
 
         self.handle = Some(handle);
+
+        // Warten, bis das Mikrofon tatsaechlich aufnimmt, BEVOR die UI „Aufnahme"
+        // signalisiert. Sonst geht der Wortanfang im WASAPI-Device-Open
+        // (~100-300 ms) verloren, weil der Nutzer schon spricht.
+        match ready_rx.recv_timeout(Duration::from_secs(3)) {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => {
+                // Setup im Capture-Thread fehlgeschlagen (z. B. kein Mikrofon).
+                self.recording.store(false, Ordering::Release);
+                if let Some(h) = self.handle.take() {
+                    let _ = h.join();
+                }
+                return Err(e);
+            }
+            Err(_) => {
+                // Timeout: lieber mit Mini-Verzug aufnehmen als gar nicht.
+            }
+        }
+
         self.started_at = Some(Instant::now());
         Ok(())
     }
@@ -126,7 +147,40 @@ impl Recorder {
     }
 }
 
-fn capture_loop(recording: &Arc<AtomicBool>, shared: &Arc<Shared>) -> Result<(), String> {
+fn capture_loop(
+    recording: &Arc<AtomicBool>,
+    shared: &Arc<Shared>,
+    ready_tx: mpsc::Sender<Result<(), String>>,
+) -> Result<(), String> {
+    // Device öffnen + Stream bauen + starten. Erst danach ist das Mikrofon live.
+    let stream = match setup_stream(shared) {
+        Ok(s) => s,
+        Err(e) => {
+            let _ = ready_tx.send(Err(e.clone()));
+            return Err(e);
+        }
+    };
+
+    if let Err(e) = stream
+        .play()
+        .map_err(|e| format!("Aufnahme-Start fehlgeschlagen: {e}"))
+    {
+        let _ = ready_tx.send(Err(e.clone()));
+        return Err(e);
+    }
+
+    // Stream läuft jetzt wirklich → grünes Licht für start().
+    let _ = ready_tx.send(Ok(()));
+
+    while recording.load(Ordering::Acquire) {
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    drop(stream);
+    Ok(())
+}
+
+/// Öffnet das Standard-Mikrofon und baut den Capture-Stream (noch ohne `play`).
+fn setup_stream(shared: &Arc<Shared>) -> Result<cpal::Stream, String> {
     let host = cpal::default_host();
     let device = host
         .default_input_device()
@@ -158,20 +212,12 @@ fn capture_loop(recording: &Arc<AtomicBool>, shared: &Arc<Shared>) -> Result<(),
     };
 
     // Stream je nach Sample-Format bauen; Kanäle zu Mono mitteln.
-    let stream = match sample_format {
+    match sample_format {
         cpal::SampleFormat::F32 => build_stream::<f32>(&device, &stream_config, channels, push, err_fn),
         cpal::SampleFormat::I16 => build_stream::<i16>(&device, &stream_config, channels, push, err_fn),
         cpal::SampleFormat::U16 => build_stream::<u16>(&device, &stream_config, channels, push, err_fn),
         other => Err(format!("Nicht unterstütztes Audio-Format: {other:?}")),
-    }?;
-
-    stream.play().map_err(|e| format!("Aufnahme-Start fehlgeschlagen: {e}"))?;
-
-    while recording.load(Ordering::Acquire) {
-        std::thread::sleep(std::time::Duration::from_millis(10));
     }
-    drop(stream);
-    Ok(())
 }
 
 fn build_stream<T>(

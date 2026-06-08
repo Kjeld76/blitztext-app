@@ -11,6 +11,10 @@ Die Windows-App hat eine **eigene Versionsspur** (unabhängig von der macOS-App)
 ## [Unveröffentlicht]
 
 ### Behoben
+- **Anfang der Aufnahme wurde abgeschnitten**: Die UI signalisierte „Aufnahme", bevor das
+  Mikrofon wirklich live war — die ersten Worte gingen verloren, während WASAPI das
+  Eingabegerät öffnete (~100–300 ms). Der Aufnahmestart wartet jetzt, bis der Audio-Stream
+  tatsächlich läuft, und stempelt die Dauer erst ab diesem Zeitpunkt.
 - **Eingesprochener Satz wurde mitunter beantwortet statt verbessert**: War ein Transkript
   wie eine Frage oder Bitte formuliert (z. B. „Kannst du mir einen Termin finden?"), konnte
   das LLM darauf antworten, statt nur den Wortlaut zu korrigieren/verbessern — und diese
