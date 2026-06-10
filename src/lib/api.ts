@@ -11,6 +11,7 @@ export interface AppSettings {
   secureLocalModeEnabled: boolean;
   selectedLocalTranscriptionModelName: string;
   hasAutoSelectedFastLocalModel: boolean;
+  prerollEnabled: boolean;
 }
 export interface TranscriptionSettings {
   language: string;

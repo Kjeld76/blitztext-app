@@ -115,6 +115,11 @@ pub struct AppSettings {
     pub selected_local_transcription_model_name: String,
     #[serde(default)]
     pub has_auto_selected_fast_local_model: bool,
+    /// Pre-Roll: Mikrofon läuft warm (Ringpuffer), damit kein Wortanfang
+    /// verloren geht und der Start ohne spürbaren Verzug erfolgt. Standard aus,
+    /// da das Mikrofon dann dauerhaft offen ist (Windows zeigt es als aktiv).
+    #[serde(default)]
+    pub preroll_enabled: bool,
 }
 
 impl Default for AppSettings {
@@ -125,6 +130,7 @@ impl Default for AppSettings {
             secure_local_mode_enabled: false,
             selected_local_transcription_model_name: default_local_model(),
             has_auto_selected_fast_local_model: false,
+            preroll_enabled: false,
         }
     }
 }

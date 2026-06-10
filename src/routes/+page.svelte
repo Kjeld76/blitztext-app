@@ -383,6 +383,14 @@
             <input type="checkbox" checked={autostart} onchange={toggleAutostart} />
             Beim Windows-Start automatisch starten
           </label>
+          <label class="row">
+            <input type="checkbox" bind:checked={settings.app.prerollEnabled} onchange={save} />
+            Mikrofon vorwärmen (kein Wortanfang verloren, sofortiger Start)
+          </label>
+          <p class="note">
+            Hält das Mikrofon offen, solange Blitztext aktiv ist – Windows zeigt es dann
+            dauerhaft als „in Benutzung". Bei Pause aus.
+          </p>
         </section>
       {/if}
       {#if saveHint}<div class="save-hint">{saveHint}</div>{/if}
@@ -431,6 +439,7 @@
   .meter .fill { height: 100%; background: #e53935; transition: width .08s linear; }
   main { padding: 14px; overflow-y: auto; }
   .hint { color: #666; font-size: .85rem; margin-top: 0; }
+  .note { color: #888; font-size: .75rem; margin: 4px 0 0; }
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .tile {
     text-align: left; border: 1px solid #e3e3e7; background: #fff; border-radius: 12px;

@@ -5,13 +5,18 @@
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::Sample;
+use std::collections::VecDeque;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread::JoinHandle;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 const TARGET_RATE: u32 = 16_000;
+
+/// Pre-Roll-Vorlauf: so viel Audio wird im warmen Modus mitgepuffert, damit der
+/// Wortanfang (und etwas Reaktionszeit) erhalten bleibt.
+const PREROLL_SECS: f32 = 0.4;
 
 #[derive(Default)]
 struct Shared {
@@ -21,13 +26,20 @@ struct Shared {
     /// Aktueller Pegel (RMS, 0..1) für die Waveform-Anzeige.
     level: Mutex<f32>,
     error: Mutex<Option<String>>,
+    /// true, während eine Aufnahme aktiv Samples sammelt (beide Modi).
+    capturing: AtomicBool,
+    /// Pre-Roll-Ringpuffer (nur im warmen Modus gefüllt), Quell-Samplerate.
+    ring: Mutex<VecDeque<f32>>,
 }
 
 pub struct Recorder {
+    /// On-Demand-Stream aktiv (nur wenn Pre-Roll aus ist).
     recording: Arc<AtomicBool>,
     shared: Arc<Shared>,
     handle: Option<JoinHandle<()>>,
-    started_at: Option<Instant>,
+    /// Warmer Dauerstream aktiv (Pre-Roll an).
+    warm_running: Arc<AtomicBool>,
+    warm_handle: Option<JoinHandle<()>>,
 }
 
 /// Ergebnis einer Aufnahme: 16-kHz-Mono-Samples + Dauer in Sekunden.
@@ -48,28 +60,72 @@ impl Recorder {
             recording: Arc::new(AtomicBool::new(false)),
             shared: Arc::new(Shared::default()),
             handle: None,
-            started_at: None,
+            warm_running: Arc::new(AtomicBool::new(false)),
+            warm_handle: None,
         }
-    }
-
-    pub fn is_recording(&self) -> bool {
-        self.recording.load(Ordering::Acquire)
     }
 
     pub fn level(&self) -> f32 {
         *self.shared.level.lock().unwrap()
     }
 
-    /// Startet die Aufnahme auf einem eigenen Thread.
+    /// Schaltet den Pre-Roll-Modus (warmer Dauerstream) ein/aus.
+    pub fn set_prewarm(&mut self, enabled: bool) {
+        if enabled {
+            if self.warm_running.load(Ordering::Acquire) {
+                return;
+            }
+            let _ = self.shared.error.lock().unwrap().take();
+            self.shared.ring.lock().unwrap().clear();
+            self.warm_running.store(true, Ordering::Release);
+
+            let warm_running = self.warm_running.clone();
+            let shared = self.shared.clone();
+            let handle = std::thread::spawn(move || {
+                if let Err(e) = warm_loop(&warm_running, &shared) {
+                    *shared.error.lock().unwrap() = Some(e);
+                    warm_running.store(false, Ordering::Release);
+                }
+            });
+            self.warm_handle = Some(handle);
+        } else {
+            if !self.warm_running.load(Ordering::Acquire) {
+                return;
+            }
+            self.warm_running.store(false, Ordering::Release);
+            if let Some(h) = self.warm_handle.take() {
+                let _ = h.join();
+            }
+            self.shared.ring.lock().unwrap().clear();
+            self.shared.capturing.store(false, Ordering::Release);
+        }
+    }
+
+    /// Startet eine Aufnahme. Im warmen Modus sofort (Mikrofon ist bereits offen),
+    /// sonst per On-Demand-Stream mit Readiness-Handshake.
     pub fn start(&mut self) -> Result<(), String> {
-        if self.is_recording() {
+        if self.shared.capturing.load(Ordering::Acquire) {
             return Ok(());
         }
-        // Zustand zurücksetzen.
-        self.shared.samples.lock().unwrap().clear();
         *self.shared.level.lock().unwrap() = 0.0;
+
+        // --- Warmer Modus: Pre-Roll aus dem Ring übernehmen, kein Device-Open. ---
+        if self.warm_running.load(Ordering::Acquire) {
+            // Ring vor samples sperren (feste Reihenfolge gegen Deadlock) und
+            // capturing noch unter samples-Lock setzen → kein Lücken-Verlust.
+            let ring = self.shared.ring.lock().unwrap();
+            let mut samples = self.shared.samples.lock().unwrap();
+            samples.clear();
+            samples.extend(ring.iter().copied());
+            self.shared.capturing.store(true, Ordering::Release);
+            return Ok(());
+        }
+
+        // --- On-Demand-Modus (Pre-Roll aus): wie bisher. ---
         *self.shared.error.lock().unwrap() = None;
+        self.shared.samples.lock().unwrap().clear();
         self.recording.store(true, Ordering::Release);
+        self.shared.capturing.store(true, Ordering::Release);
 
         let recording = self.recording.clone();
         let shared = self.shared.clone();
@@ -82,7 +138,6 @@ impl Recorder {
                 recording.store(false, Ordering::Release);
             }
         });
-
         self.handle = Some(handle);
 
         // Warten, bis das Mikrofon tatsaechlich aufnimmt, BEVOR die UI „Aufnahme"
@@ -93,6 +148,7 @@ impl Recorder {
             Ok(Err(e)) => {
                 // Setup im Capture-Thread fehlgeschlagen (z. B. kein Mikrofon).
                 self.recording.store(false, Ordering::Release);
+                self.shared.capturing.store(false, Ordering::Release);
                 if let Some(h) = self.handle.take() {
                     let _ = h.join();
                 }
@@ -102,25 +158,21 @@ impl Recorder {
                 // Timeout: lieber mit Mini-Verzug aufnehmen als gar nicht.
             }
         }
-
-        self.started_at = Some(Instant::now());
         Ok(())
     }
 
     /// Stoppt die Aufnahme und liefert die 16-kHz-Mono-Samples + Dauer.
+    /// Im warmen Modus bleibt der Stream danach weiter aktiv.
     pub fn stop(&mut self) -> Result<Recording, String> {
-        if !self.is_recording() && self.handle.is_none() {
-            return Err("Es läuft keine Aufnahme.".into());
+        let warm = self.warm_running.load(Ordering::Acquire);
+        self.shared.capturing.store(false, Ordering::Release);
+
+        if !warm {
+            self.recording.store(false, Ordering::Release);
+            if let Some(h) = self.handle.take() {
+                let _ = h.join();
+            }
         }
-        self.recording.store(false, Ordering::Release);
-        if let Some(h) = self.handle.take() {
-            let _ = h.join();
-        }
-        let duration_secs = self
-            .started_at
-            .take()
-            .map(|t| t.elapsed().as_secs_f64())
-            .unwrap_or(0.0);
 
         if let Some(err) = self.shared.error.lock().unwrap().take() {
             return Err(err);
@@ -128,6 +180,8 @@ impl Recorder {
 
         let src_rate = self.shared.src_rate.load(Ordering::Acquire).max(1);
         let raw = std::mem::take(&mut *self.shared.samples.lock().unwrap());
+        // Dauer aus der tatsächlichen Sample-Zahl (berücksichtigt den Pre-Roll).
+        let duration_secs = raw.len() as f64 / src_rate as f64;
         let samples_16k = resample_mono(&raw, src_rate, TARGET_RATE);
 
         Ok(Recording {
@@ -136,14 +190,16 @@ impl Recorder {
         })
     }
 
-    /// Bricht eine laufende Aufnahme ab (Samples verwerfen).
+    /// Bricht eine laufende Aufnahme ab (Samples verwerfen). Warmer Stream bleibt.
     pub fn discard(&mut self) {
-        self.recording.store(false, Ordering::Release);
-        if let Some(h) = self.handle.take() {
-            let _ = h.join();
+        self.shared.capturing.store(false, Ordering::Release);
+        if !self.warm_running.load(Ordering::Acquire) {
+            self.recording.store(false, Ordering::Release);
+            if let Some(h) = self.handle.take() {
+                let _ = h.join();
+            }
         }
         self.shared.samples.lock().unwrap().clear();
-        self.started_at = None;
     }
 }
 
@@ -152,8 +208,12 @@ fn capture_loop(
     shared: &Arc<Shared>,
     ready_tx: mpsc::Sender<Result<(), String>>,
 ) -> Result<(), String> {
+    // On-Demand-Push: nur während capturing → samples + Pegel (kein Ring).
+    let s = shared.clone();
+    let push = move |mono: &[f32]| record_push(&s, mono);
+
     // Device öffnen + Stream bauen + starten. Erst danach ist das Mikrofon live.
-    let stream = match setup_stream(shared) {
+    let stream = match setup_stream(shared, push) {
         Ok(s) => s,
         Err(e) => {
             let _ = ready_tx.send(Err(e.clone()));
@@ -179,8 +239,61 @@ fn capture_loop(
     Ok(())
 }
 
-/// Öffnet das Standard-Mikrofon und baut den Capture-Stream (noch ohne `play`).
-fn setup_stream(shared: &Arc<Shared>) -> Result<cpal::Stream, String> {
+/// Warmer Dauerstream (Pre-Roll): füllt fortlaufend den Ring und sammelt
+/// während einer aktiven Aufnahme zusätzlich in `samples`.
+fn warm_loop(running: &Arc<AtomicBool>, shared: &Arc<Shared>) -> Result<(), String> {
+    let s = shared.clone();
+    let push = move |mono: &[f32]| warm_push(&s, mono);
+    let stream = setup_stream(shared, push)?;
+    stream
+        .play()
+        .map_err(|e| format!("Aufnahme-Start fehlgeschlagen: {e}"))?;
+
+    while running.load(Ordering::Acquire) {
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    drop(stream);
+    Ok(())
+}
+
+/// Callback des On-Demand-Streams: nur Aufnahme-Samples + Pegel.
+fn record_push(shared: &Shared, mono: &[f32]) {
+    if mono.is_empty() || !shared.capturing.load(Ordering::Acquire) {
+        return;
+    }
+    let rms = (mono.iter().map(|s| s * s).sum::<f32>() / mono.len() as f32).sqrt();
+    *shared.level.lock().unwrap() = rms.min(1.0);
+    shared.samples.lock().unwrap().extend_from_slice(mono);
+}
+
+/// Callback des warmen Streams: Ring immer füllen (begrenzt), zusätzlich
+/// `samples` + Pegel, solange aufgenommen wird. Sperrreihenfolge: ring → samples.
+fn warm_push(shared: &Shared, mono: &[f32]) {
+    if mono.is_empty() {
+        return;
+    }
+    let cap = ((shared.src_rate.load(Ordering::Acquire) as f32) * PREROLL_SECS) as usize;
+    {
+        let mut ring = shared.ring.lock().unwrap();
+        ring.extend(mono.iter().copied());
+        if cap > 0 && ring.len() > cap {
+            let excess = ring.len() - cap;
+            ring.drain(0..excess);
+        }
+    }
+    if shared.capturing.load(Ordering::Acquire) {
+        let rms = (mono.iter().map(|s| s * s).sum::<f32>() / mono.len() as f32).sqrt();
+        *shared.level.lock().unwrap() = rms.min(1.0);
+        shared.samples.lock().unwrap().extend_from_slice(mono);
+    }
+}
+
+/// Öffnet das Standard-Mikrofon und baut den Capture-Stream (noch ohne `play`)
+/// mit dem übergebenen Push-Callback.
+fn setup_stream(
+    shared: &Arc<Shared>,
+    push: impl FnMut(&[f32]) + Send + 'static,
+) -> Result<cpal::Stream, String> {
     let host = cpal::default_host();
     let device = host
         .default_input_device()
@@ -196,19 +309,9 @@ fn setup_stream(shared: &Arc<Shared>) -> Result<cpal::Stream, String> {
     let sample_format = config.sample_format();
     let stream_config: cpal::StreamConfig = config.into();
 
-    let shared_cb = shared.clone();
     let err_shared = shared.clone();
     let err_fn = move |e: cpal::StreamError| {
         *err_shared.error.lock().unwrap() = Some(format!("Audio-Fehler: {e}"));
-    };
-
-    let push = move |mono: &[f32]| {
-        if mono.is_empty() {
-            return;
-        }
-        let rms = (mono.iter().map(|s| s * s).sum::<f32>() / mono.len() as f32).sqrt();
-        *shared_cb.level.lock().unwrap() = rms.min(1.0);
-        shared_cb.samples.lock().unwrap().extend_from_slice(mono);
     };
 
     // Stream je nach Sample-Format bauen; Kanäle zu Mono mitteln.

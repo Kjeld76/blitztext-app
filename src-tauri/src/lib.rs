@@ -175,6 +175,7 @@ fn save_settings(app: AppHandle, new_settings: SettingsContainer) -> Result<(), 
     app.state::<SharedState>().lock().unwrap().settings = new_settings;
     apply_hotkeys(&app);
     apply_autostart(&app, launch);
+    apply_prewarm(&app);
     Ok(())
 }
 
@@ -383,8 +384,24 @@ fn set_active_state(app: &AppHandle, active: bool) {
         }));
     }
     let _ = app.emit("active", active);
+    apply_prewarm(app);
     if active {
         workflows::set_status(app, "idle", None, None);
+    }
+}
+
+/// Warmes Mikrofon (Pre-Roll) gemäß Einstellung + Aktiv-Zustand schalten.
+fn apply_prewarm(app: &AppHandle) {
+    let enabled = app
+        .state::<SharedState>()
+        .lock()
+        .unwrap()
+        .settings
+        .app
+        .preroll_enabled;
+    let active = *app.state::<ActiveState>().lock().unwrap();
+    if let Some(engine) = app.try_state::<EngineState>() {
+        engine.lock().unwrap().set_prewarm(enabled && active);
     }
 }
 
@@ -492,6 +509,9 @@ pub fn run() {
                     paused: paused_icon,
                 });
             }
+
+            // Pre-Roll (warmes Mikrofon) gemäß Einstellung starten.
+            apply_prewarm(&handle);
 
             // Hotkeys registrieren
             apply_hotkeys(&handle);

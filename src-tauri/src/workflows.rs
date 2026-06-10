@@ -65,6 +65,11 @@ impl Engine {
     pub fn level(&self) -> f32 {
         self.recorder.level()
     }
+
+    /// Pre-Roll-Modus (warmes Mikrofon) ein-/ausschalten.
+    pub fn set_prewarm(&mut self, enabled: bool) {
+        self.recorder.set_prewarm(enabled);
+    }
 }
 
 // MARK: - Status (Event an Frontend + Tray-Tooltip)
