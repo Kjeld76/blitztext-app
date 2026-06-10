@@ -126,4 +126,61 @@ mod tests {
         assert!(guard.contains(INPUT_START));
         assert!(guard.contains(INPUT_END));
     }
+
+    #[test]
+    fn korrektur_prompt_nimmt_custom_terms_nur_bei_bedarf_auf() {
+        let ohne = build_correction_system_prompt(&[]);
+        assert!(!ohne.contains("Eigennamen"));
+
+        let mit = build_correction_system_prompt(&["Blitztext".into(), "Tauri".into()]);
+        assert!(mit.contains("Blitztext, Tauri"));
+        // Basis-Anweisung bleibt erhalten.
+        assert!(mit.starts_with(&ohne));
+    }
+
+    #[test]
+    fn emoji_prompt_unterscheidet_die_dichten() {
+        let wenig = build_emoji_system_prompt(EmojiDensity::Wenig);
+        let mittel = build_emoji_system_prompt(EmojiDensity::Mittel);
+        let viel = build_emoji_system_prompt(EmojiDensity::Viel);
+        assert_ne!(wenig, mittel);
+        assert_ne!(mittel, viel);
+        assert!(wenig.contains("maximal 1-2 pro Absatz"));
+        assert!(viel.contains("grosszuegig"));
+    }
+
+    #[test]
+    fn verbesserungs_prompt_spiegelt_ton_kontext_und_begriffe() {
+        let settings = TextImprovementSettings {
+            system_prompt: String::new(),
+            custom_terms: vec!["RUB".into()],
+            context: "E-Mail an Kollegen".into(),
+            tone: TextTone::Formal,
+            custom_name: String::new(),
+        };
+        let prompt = build_improvement_system_prompt(&settings);
+        assert!(prompt.contains("formellen"));
+        assert!(prompt.contains("RUB"));
+        assert!(prompt.contains("Kontext: E-Mail an Kollegen"));
+
+        let neutral = build_improvement_system_prompt(&TextImprovementSettings::default());
+        assert!(neutral.contains("neutralen"));
+    }
+
+    #[test]
+    fn eigener_system_prompt_ersetzt_den_default_behaelt_aber_begriffe() {
+        let settings = TextImprovementSettings {
+            system_prompt: "Mein eigener Prompt.".into(),
+            custom_terms: vec!["Whisper".into()],
+            context: "wird ignoriert".into(),
+            tone: TextTone::Casual,
+            custom_name: String::new(),
+        };
+        let prompt = build_improvement_system_prompt(&settings);
+        assert!(prompt.starts_with("Mein eigener Prompt."));
+        assert!(prompt.contains("Whisper"));
+        // Ton und Kontext gelten nur fuer den Default-Prompt.
+        assert!(!prompt.contains("lockeren"));
+        assert!(!prompt.contains("wird ignoriert"));
+    }
 }

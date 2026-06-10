@@ -63,3 +63,31 @@ jobs:
 
       - name: Build frontend
         run: pnpm build
+
+  rust-test:
+    name: Rust tests
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # tauri-build erwartet das frontendDist-Verzeichnis; für cargo test
+      # genügt ein leeres (die Tests brauchen kein gebautes Frontend).
+      - name: Create empty frontend dist
+        run: New-Item -ItemType Directory -Force build | Out-Null
+
+      # whisper-rs/bindgen braucht libclang; LLVM ist auf windows-latest
+      # vorinstalliert.
+      - name: Run cargo test
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+        env:
+          LIBCLANG_PATH: C:\Program Files\LLVM\bin
