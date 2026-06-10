@@ -44,9 +44,11 @@ pub fn update(app: &AppHandle, phase: &str) {
     };
     if phase == "recording" {
         position(&window);
-        let _ = window.show();
-    } else {
-        let _ = window.hide();
+        if let Err(e) = window.show() {
+            eprintln!("Overlay konnte nicht angezeigt werden: {e}");
+        }
+    } else if let Err(e) = window.hide() {
+        eprintln!("Overlay konnte nicht versteckt werden: {e}");
     }
 }
 

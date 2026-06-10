@@ -141,7 +141,16 @@ pub async fn run_pipeline(
         engine.lock().unwrap().finish_processing();
     }
     tokio::time::sleep(std::time::Duration::from_millis(1100)).await;
-    set_status(&app, "idle", None, None);
+    // Nicht auf idle zurückfallen, wenn inzwischen die nächste Aufnahme läuft —
+    // sonst versteckt das verspätete idle deren Sprech-Overlay (besonders im
+    // warmen Modus, wo Folgeaufnahmen sofort starten).
+    let busy = app
+        .try_state::<crate::EngineState>()
+        .map(|e| e.lock().unwrap().is_busy())
+        .unwrap_or(false);
+    if !busy {
+        set_status(&app, "idle", None, None);
+    }
 }
 
 async fn process(
