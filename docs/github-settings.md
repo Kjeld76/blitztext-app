@@ -1,33 +1,36 @@
 # GitHub Settings Checklist
 
-These settings are not stored in the repository. Configure them in GitHub before going public.
+These settings are not stored in the repository. They were applied via `gh` (status: 2026-06-10); re-check after major changes.
 
 ## Security
 
-- Enable Dependabot alerts.
-- Enable secret scanning.
-- Enable push protection for supported secret types.
-- Enable private vulnerability reporting when available.
+- [x] Dependabot alerts enabled.
+- [x] Secret scanning enabled.
+- [x] Push protection for supported secret types enabled.
+- [x] Private vulnerability reporting enabled.
 
 ## Branch Protection
 
-Protect `main`:
+`main` is protected with a deliberate solo-maintainer compromise: direct
+commits stay allowed (no pull-request requirement), but the history is
+protected against accidents.
 
-- require pull request before merge
-- require at least one approval
-- require the CI workflow to pass
-- dismiss stale approvals when new commits are pushed
-- block force pushes
+- [x] block force pushes
+- [x] block branch deletion
+- [ ] require pull request + approval + CI — intentionally **not** enabled
+      while the project is maintained solo with direct commits to `main`;
+      revisit when there is more than one regular contributor.
 
 ## Actions
 
-- Keep default workflow permissions read-only.
-- Require approval for workflows from first-time contributors.
-- Do not add repository secrets unless they are truly needed.
+- [x] Default workflow permissions read-only (`permissions: contents: read` in the workflow).
+- [x] Require approval for workflows from first-time contributors (GitHub default).
+- [x] No repository secrets configured.
 
 ## Community
 
-- Keep Issues enabled for bugs and focused requests.
-- Enable Discussions only if you want a lower-friction place for questions.
-- Set repository topics after the project is public.
-- Review the GitHub community profile before sharing the repo widely.
+- [x] Issues enabled for bugs and focused requests.
+- [x] Discussions disabled for now (revisit on demand).
+- [x] Repository topics set (tauri, rust, sveltekit, whisper, speech-to-text, dictation, windows, cuda, llm, …).
+- [x] Repository description set.
+- [ ] Social preview image: upload manually under *Settings → General → Social preview* (1280×640 PNG; cannot be set via API).
