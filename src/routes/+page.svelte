@@ -399,6 +399,18 @@
             Hält das Mikrofon offen, solange Blitztext aktiv ist – Windows zeigt es dann
             dauerhaft als „in Benutzung". Bei Pause aus.
           </p>
+          <label class="col">
+            Einfügen (Tastenkürzel)
+            <select bind:value={settings.windows.pasteShortcut} onchange={save}>
+              <option value="auto">Automatisch (Terminals erkennen)</option>
+              <option value="ctrlV">Immer Strg+V</option>
+              <option value="ctrlShiftV">Immer Strg+Umschalt+V</option>
+            </select>
+          </label>
+          <p class="note">
+            Viele Terminals (z.&nbsp;B. Windows Terminal) fügen mit Strg+Umschalt+V ein.
+            „Automatisch" erkennt sie und nutzt sonst Strg+V.
+          </p>
         </section>
       {/if}
       {#if saveHint}<div class="save-hint">{saveHint}</div>{/if}

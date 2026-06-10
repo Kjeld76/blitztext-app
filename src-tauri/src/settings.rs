@@ -78,6 +78,18 @@ impl WorkflowType {
     }
 }
 
+/// Tastenkürzel fürs automatische Einfügen nach der Verarbeitung.
+/// `Auto` erkennt Terminals am Vordergrundfenster und nutzt dort Ctrl+Shift+V
+/// (viele Terminals mappen Ctrl+V nicht auf Einfügen), sonst Ctrl+V.
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum PasteShortcutMode {
+    #[default]
+    Auto,
+    CtrlV,
+    CtrlShiftV,
+}
+
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum TextTone {
@@ -275,6 +287,8 @@ pub struct WindowsSettings {
     pub hotkeys: HashMap<String, String>,
     #[serde(default)]
     pub gateway: GatewaySettings,
+    #[serde(default)]
+    pub paste_shortcut: PasteShortcutMode,
 }
 
 impl Default for WindowsSettings {
@@ -283,6 +297,7 @@ impl Default for WindowsSettings {
             launch_at_login: false,
             hotkeys: default_hotkeys(),
             gateway: GatewaySettings::default(),
+            paste_shortcut: PasteShortcutMode::default(),
         }
     }
 }

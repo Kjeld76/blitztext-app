@@ -37,12 +37,14 @@ hound = "3"
 futures-util = "0.3"
 whisper-rs = "0.16"
 
-# Win32 für das Sprech-Overlay (Positionierung über Taskleiste + kein Fokusklau).
+# Win32 für das Sprech-Overlay (Positionierung über Taskleiste + kein Fokusklau)
+# und die Terminal-Erkennung beim Einfügen (Vordergrund-Prozessname).
 # Version an Tauris `windows`-Crate angeglichen, um Doppelung zu vermeiden.
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Threading",
 ] }
 
 [features]

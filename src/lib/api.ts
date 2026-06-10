@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 export type HotkeyMode = "hold" | "toggle";
 export type TextTone = "formal" | "neutral" | "casual";
 export type EmojiDensity = "wenig" | "mittel" | "viel";
+export type PasteShortcutMode = "auto" | "ctrlV" | "ctrlShiftV";
 
 export interface AppSettings {
   hotkeyMode: HotkeyMode;
@@ -43,6 +44,7 @@ export interface WindowsSettings {
   launchAtLogin: boolean;
   hotkeys: Record<string, string>;
   gateway: GatewaySettings;
+  pasteShortcut: PasteShortcutMode;
 }
 export interface SettingsContainer {
   app: AppSettings;

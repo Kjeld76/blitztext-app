@@ -125,8 +125,10 @@ pub async fn run_pipeline(
         Ok(text) => {
             // Paste blockierend.
             let to_paste = text.clone();
+            let paste_mode = settings.windows.paste_shortcut;
             let paste_res =
-                tokio::task::spawn_blocking(move || paste::paste_text(&to_paste)).await;
+                tokio::task::spawn_blocking(move || paste::paste_text(&to_paste, paste_mode))
+                    .await;
             match paste_res {
                 Ok(Ok(())) => set_status(&app, "done", Some(workflow), None),
                 Ok(Err(e)) => set_status(&app, "error", Some(workflow), Some(e)),
