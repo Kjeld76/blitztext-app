@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blitztext Overlay</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+        cursor: default;
+      }
+      .pill {
+        box-sizing: border-box;
+        margin: 6px;
+        height: calc(100% - 12px);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: rgba(28, 28, 30, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+        color: #f2f2f2;
+      }
+      /* Pulsierender Mikrofon-Punkt – signalisiert „live". */
+      .mic {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ff4d4f;
+        box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.6);
+        animation: pulse 1.4s ease-out infinite;
+      }
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.55); }
+        70% { box-shadow: 0 0 0 9px rgba(255, 77, 79, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0); }
+      }
+      .text { flex: 1; min-width: 0; line-height: 1.15; }
+      .title { font-size: 13px; font-weight: 600; white-space: nowrap; }
+      .sub {
+        font-size: 11px;
+        color: #a8a8ad;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      /* Live-Pegel als schmaler Balken rechts. */
+      .meter {
+        flex: none;
+        width: 46px;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.14);
+        overflow: hidden;
+      }
+      .meter .fill {
+        /* <span> ist inline – ohne block werden width/height ignoriert. */
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #34d399, #f59e0b, #ff4d4f);
+        transition: width 0.08s linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pill">
+      <span class="mic"></span>
+      <span class="text">
+        <span class="title" id="title">Sprich jetzt</span>
+        <span class="sub" id="sub">Blitztext nimmt auf …</span>
+      </span>
+      <span class="meter"><span class="fill" id="fill"></span></span>
+    </div>
+
+    <script>
+      const NAMES = {
+        transcription: "Blitztext",
+        localTranscription: "Blitztext Lokal",
+        textImprover: "Blitztext+",
+        dampfAblassen: "Blitztext $%&!",
+        emojiText: "Blitztext :)",
+      };
+
+      const subEl = document.getElementById("sub");
+      const fillEl = document.getElementById("fill");
+
+      // RMS → Balkenbreite in %, über dB-Skala (−52…−32 dB → 0…100 %).
+      // Mikrofone liefern bei normaler Sprache oft nur RMS 0,005–0,05; eine
+      // lineare Skala bliebe da unsichtbar, dB entspricht dem Gehör. Das enge
+      // Fenster sorgt für sichtbaren Ausschlag schon bei normaler Lautstärke.
+      function levelToPercent(lvl) {
+        if (!lvl || lvl <= 0) return 0;
+        const db = 20 * Math.log10(lvl);
+        return Math.max(0, Math.min(100, ((db + 52) / 20) * 100));
+      }
+
+      const T = window.__TAURI__;
+      if (T) {
+        // Workflow-Name in der Subzeile spiegeln.
+        T.event.listen("status", (e) => {
+          const wf = e.payload && e.payload.workflow;
+          subEl.textContent = wf && NAMES[wf] ? NAMES[wf] + " nimmt auf …" : "Blitztext nimmt auf …";
+        });
+
+        // Pegel pollen, solange das Fenster sichtbar ist (Rust blendet es
+        // nur während der Aufnahme ein, daher genügt simples Polling).
+        setInterval(async () => {
+          try {
+            const lvl = await T.core.invoke("audio_level");
+            fillEl.style.width = levelToPercent(lvl) + "%";
+          } catch (_) {
+            fillEl.style.width = "0%";
+          }
+        }, 90);
+      }
+    </script>
+  </body>
+</html>

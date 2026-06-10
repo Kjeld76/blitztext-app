@@ -28,6 +28,14 @@
   let capturingFor = $state<string | null>(null);
   let level = $state(0);
 
+  // RMS → Balkenbreite in %, über dB-Skala (−52…−32 dB → 0…100 %);
+  // identisch zur Anzeige im Sprech-Overlay (overlay.html).
+  function levelToPercent(lvl: number): number {
+    if (!lvl || lvl <= 0) return 0;
+    const db = 20 * Math.log10(lvl);
+    return Math.max(0, Math.min(100, ((db + 52) / 20) * 100));
+  }
+
   const phaseLabel: Record<string, string> = {
     idle: "Bereit",
     recording: "Aufnahme läuft …",
@@ -199,7 +207,7 @@
   </div>
 
   {#if status.phase === "recording"}
-    <div class="meter"><div class="fill" style="width:{Math.min(100, level * 180)}%"></div></div>
+    <div class="meter"><div class="fill" style="width:{levelToPercent(level)}%"></div></div>
   {/if}
 
   {#if !settings}

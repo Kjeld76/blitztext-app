@@ -89,6 +89,9 @@ pub fn set_status(app: &AppHandle, phase: &str, workflow: Option<WorkflowType>, 
     };
     let _ = app.emit("status", evt);
 
+    // Sprech-Overlay ein-/ausblenden (sichtbar nur während der Aufnahme).
+    crate::overlay::update(app, phase);
+
     // Tray-Tooltip aktualisieren.
     if let Some(tray) = app.tray_by_id("main") {
         let tip = match phase {

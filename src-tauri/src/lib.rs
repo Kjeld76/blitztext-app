@@ -3,6 +3,7 @@
 mod audio;
 mod credentials;
 mod llm;
+mod overlay;
 mod paste;
 mod prompts;
 mod quality;
@@ -508,6 +509,11 @@ pub fn run() {
                     active: active_icon,
                     paused: paused_icon,
                 });
+            }
+
+            // Sprech-Overlay (versteckt) vorbereiten.
+            if let Err(e) = overlay::create(&handle) {
+                eprintln!("Overlay konnte nicht erstellt werden: {e}");
             }
 
             // Pre-Roll (warmes Mikrofon) gemäß Einstellung starten.
