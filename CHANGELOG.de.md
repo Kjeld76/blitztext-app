@@ -8,7 +8,28 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 und das Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 Die Windows-App hat eine **eigene Versionsspur** (unabhängig von der macOS-App), beginnend bei `0.1.0`.
 
-## [Unveröffentlicht]
+## [0.2.0] - 2026-06-11
+
+Komfort-Release: Sprech-Overlay (Pille) mit Live-Pegel, optionales Mikrofon-Vorwärmen,
+terminal-bewusstes Einfügen — dazu Fixes für abgeschnittene Aufnahme-Anfänge und
+Transkripte, die beantwortet statt bearbeitet wurden.
+
+### Hinzugefügt
+- **Sprech-Overlay (Pille)**: Während der Aufnahme zeigt eine kleine Pille **oben mittig**
+  auf dem Bildschirm den Status und einen **Live-Pegel**. Oben platziert, damit das
+  Windows-Lautstärke-Flyout (das manche Headsets beim Öffnen des Mikrofons auslösen) sie
+  nicht verdeckt. Der Pegel nutzt eine dB-Skala (−52…−32 dB), die Anzeige im Hauptfenster
+  wurde angeglichen — leise Mikrofone zeigen jetzt einen brauchbaren Ausschlag.
+- **Mikrofon-Vorwärmen (Pre-Roll)**, optional: hält das Eingabegerät warm, sodass eine
+  Aufnahme sofort startet, ohne auf das Öffnen des Geräts zu warten. Neue Einstellung
+  unter *System* (`app.prerollEnabled`).
+- **Terminal-bewusstes Einfügen**: Auto-Paste prüft das Vordergrundfenster (Fensterklasse +
+  Prozessname) und sendet in bekannten Terminals (Windows Terminal, wezterm, alacritty, …)
+  **Strg+Umschalt+V** statt Strg+V. Neue Einstellung `windows.pasteShortcut` unter *System*:
+  Automatisch / immer Strg+V / immer Strg+Umschalt+V. Klassisches conhost bleibt bewusst
+  bei Strg+V. Damit ist die Terminal-Einschränkung aus „Bekannt" in 0.1.1 behoben.
+- **Unit-Tests + CI**: 12 Unit-Tests (Transkript-Qualitätsfilter, Prompt-Aufbau);
+  die CI führt `cargo test` unter Windows aus und ist auch manuell startbar.
 
 ### Behoben
 - **Anfang der Aufnahme wurde abgeschnitten**: Die UI signalisierte „Aufnahme", bevor das
@@ -22,6 +43,10 @@ Die Windows-App hat eine **eigene Versionsspur** (unabhängig von der macOS-App)
   jedes Text-Prompt erhält eine Schutzklausel, die das Modell anweist, die Eingabe strikt
   als zu bearbeitenden Text zu behandeln — niemals als Anweisung. Gilt für alle
   Text-Workflows (Korrektur, Verbesserer, Emoji, Dampf ablassen), auch für eigene Prompts.
+- **Sprech-Pille verschwand bei schnellen Folgeaufnahmen**: Ein verzögertes „idle"-Signal
+  (1,1 s nach Abschluss eines Workflows) versteckte die Pille einer bereits wieder
+  laufenden Aufnahme. „idle" wird jetzt nur noch gemeldet, wenn die Engine nicht
+  beschäftigt ist; Fehler beim Zeigen/Verstecken des Overlays werden geloggt.
 
 ## [0.1.1] - 2026-06-07
 

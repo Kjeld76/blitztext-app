@@ -8,7 +8,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 The Windows app has its **own version track** (independent of the macOS app), starting at `0.1.0`.
 
-## [Unreleased]
+## [0.2.0] - 2026-06-11
+
+Usability release: speech overlay pill with live level meter, optional mic pre-warm,
+terminal-aware pasting, plus fixes for clipped recording starts and transcripts that
+were answered instead of edited.
+
+### Added
+- **Speech overlay (pill)**: while recording, a small pill at the **top center** of the
+  screen shows the state and a **live level meter**. Positioned at the top so the Windows
+  volume flyout (triggered by some headsets when the mic opens) doesn't cover it. The
+  meter uses a dB scale (−52…−32 dB), and the main-window meter was aligned to match —
+  quiet microphones now show a useful level.
+- **Mic pre-warm (pre-roll)**, optional: keeps the input device warm so a recording
+  starts instantly without waiting for the device to open. New setting under *System*
+  (`app.prerollEnabled`).
+- **Terminal-aware pasting**: auto-paste inspects the foreground window (window class +
+  process name) and sends **Ctrl+Shift+V** in known terminals (Windows Terminal, wezterm,
+  alacritty, …) instead of Ctrl+V. New setting `windows.pasteShortcut` under *System*:
+  auto / always Ctrl+V / always Ctrl+Shift+V. Classic conhost intentionally stays on
+  Ctrl+V. This resolves the terminal limitation noted under "Known" in 0.1.1.
+- **Unit tests + CI**: 12 unit tests (transcript quality filters, prompt building);
+  CI runs `cargo test` on Windows and can also be triggered manually.
 
 ### Fixed
 - **Beginning of recordings was clipped**: the UI signalled "recording" before the
@@ -22,6 +43,10 @@ The Windows app has its **own version track** (independent of the macOS app), st
   a guard clause instructing the model to treat the input strictly as text to edit — never
   as an instruction. Applies to all text workflows (correction, improver, emoji, calm down),
   including custom prompts.
+- **Speech pill disappeared on quick follow-up recordings**: a delayed "idle" signal
+  (1.1 s after a workflow finished) hid the pill of a recording that had already started
+  again. "Idle" is now only signalled when the engine isn't busy; overlay show/hide
+  errors are logged.
 
 ## [0.1.1] - 2026-06-07
 
