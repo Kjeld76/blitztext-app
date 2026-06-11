@@ -122,7 +122,7 @@ pnpm tauri dev          # start the app in the tray (development)
 pnpm tauri build        # build the MSI/NSIS installers
 ```
 
-GPU acceleration (NVIDIA/CUDA) is optional: `pnpm tauri build --features cuda` (also enables beam search for higher accuracy). **Building** requires the CUDA toolkit (13.x); the target architectures are set via `CMAKE_CUDA_ARCHITECTURES` in the local `src-tauri/.cargo/config.toml` (e.g. `75-real;86-real;89-real;120-real;75-virtual` for Turing–Blackwell). The **finished CUDA installers** ship the CUDA runtime themselves — end users don't need a toolkit.
+GPU acceleration (NVIDIA/CUDA) is optional: `pnpm tauri build --features cuda` (also enables beam search for higher accuracy). **Building** requires the CUDA toolkit (13.x); the target architectures are set via `CMAKE_CUDA_ARCHITECTURES` in the local `src-tauri/.cargo/config.toml` (e.g. `75-real;86-real;89-real;120-real;75-virtual` for Turing–Blackwell). The **finished CUDA installers** ship the CUDA runtime themselves — end users don't need a toolkit. To bundle it, place the runtime DLLs (`cudart64_13.dll`, `cublas64_13.dll`, `cublasLt64_13.dll`, from the toolkit's `bin\x64`) in `src-tauri/cuda-redist/` (gitignored) and build with `pnpm tauri build --features cuda --config src-tauri/tauri.cuda.conf.json` — the merge config installs them next to the EXE.
 
 > Always build via the **Tauri CLI** (`pnpm tauri …`), **not** via a bare `cargo build` — otherwise the app expects the dev server on `localhost:1420`.
 

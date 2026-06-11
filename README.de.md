@@ -122,7 +122,7 @@ pnpm tauri dev          # App im Tray starten (Entwicklung)
 pnpm tauri build        # MSI/NSIS-Installer bauen
 ```
 
-GPU-Beschleunigung (NVIDIA/CUDA) optional: `pnpm tauri build --features cuda` (aktiviert zugleich Beam-Search für höhere Genauigkeit). Zum **Bauen** wird das CUDA-Toolkit (13.x) benötigt; die Ziel-Architekturen werden über `CMAKE_CUDA_ARCHITECTURES` in der lokalen `src-tauri/.cargo/config.toml` gesetzt (z. B. `75-real;86-real;89-real;120-real;75-virtual` für Turing–Blackwell). Die **fertigen CUDA-Installer** bringen die CUDA-Runtime selbst mit – Endnutzer brauchen kein Toolkit.
+GPU-Beschleunigung (NVIDIA/CUDA) optional: `pnpm tauri build --features cuda` (aktiviert zugleich Beam-Search für höhere Genauigkeit). Zum **Bauen** wird das CUDA-Toolkit (13.x) benötigt; die Ziel-Architekturen werden über `CMAKE_CUDA_ARCHITECTURES` in der lokalen `src-tauri/.cargo/config.toml` gesetzt (z. B. `75-real;86-real;89-real;120-real;75-virtual` für Turing–Blackwell). Die **fertigen CUDA-Installer** bringen die CUDA-Runtime selbst mit – Endnutzer brauchen kein Toolkit. Zum Bündeln die Runtime-DLLs (`cudart64_13.dll`, `cublas64_13.dll`, `cublasLt64_13.dll`, aus `bin\x64` des Toolkits) nach `src-tauri/cuda-redist/` legen (gitignored) und mit `pnpm tauri build --features cuda --config src-tauri/tauri.cuda.conf.json` bauen – die Merge-Konfiguration installiert sie neben die EXE.
 
 > Immer über die **Tauri-CLI** bauen (`pnpm tauri …`), **nicht** über nacktes `cargo build` – sonst erwartet die App den Dev-Server auf `localhost:1420`.
 
